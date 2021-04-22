@@ -39,6 +39,12 @@ bootstrapcca <- function(X, Y, level = .05, nboots = 1e3){
     rho.t <- apply(rho.dist, 1, quantile, probs = level)
     alpha.t <- apply(alpha.dist, c(1,2), quantile, probs = level)
     beta.t <- apply(beta.dist, c(1,2), quantile, probs = level)
+
+    rho.ci <- array(c(rho.hat - rho.t, rho.hat, rho.hat + rho.t),
+                    dim = c(K, 3),
+                    dimnames = list(Component = 1:K, Interval = c("Lower", "Estimate", "Upper")))
+
+
     
 }
 
