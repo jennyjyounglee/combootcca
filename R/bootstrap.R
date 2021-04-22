@@ -11,6 +11,10 @@
 ##' @export
 bootstrapcca <- function(X, Y, level = .05, nboots = 1e3){
     N <- nrow(X)
+    px <- ncol(X)
+    py <- ncol(Y)
+    K <- min(px, py)
+
     fm <- cancor.signfix(X, Y)
     rho.hat <- fm$cor
     beta.hat <- fm$ycoef
