@@ -4,11 +4,12 @@
 ##' @title bootstrap CCA with Sign Fixing
 ##' @param X Data matrix of size N by p
 ##' @param Y Data matrix of size N by q
+##' @param level Level for confidence intervals, should be in (0, 1)
 ##' @param nboots Number of bootstrap sample to draw
 ##' @return 
 ##' @author Daniel Kessler
 ##' @export
-bootstrapcca <- function(X, Y, nboots){
+bootstrapcca <- function(X, Y, level = .05, nboots = 1e3){
     N <- nrow(X)
     fm <- cancor.signfix(X, Y)
     rho.hat <- fm$cor
