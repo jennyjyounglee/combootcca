@@ -31,6 +31,10 @@ bootstrapcca <- function(X, Y, level = .05, nboots = 1e3){
         alpha.boot[,,i] <- fm.boot$xcoef
         beta.boot[,,i] <- fm.boot$ycoef
     }
+
+    rho.dist  <- abs(sweep(rho.boot, c(1), rho.hat))
+    alpha.dist <- abs(sweep(alpha.boot, c(1, 2), alpha.hat))
+    beta.dist <- abs(sweep(beta.boot, c(1, 2), beta.hat))
     
 }
 
