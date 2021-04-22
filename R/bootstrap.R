@@ -16,15 +16,15 @@ bootstrapcca <- function(X, Y, nboots){
     alpha.hat <- fm$xcoef
 
     rho.boot <- array(dim=c(length(rho.hat),nboots))
-    beta.boot <- array(dim=c(dim(beta.hat),nboots))
     alpha.boot <- array(dim=c(dim(alpha.hat),nboots))
+    beta.boot <- array(dim=c(dim(beta.hat),nboots))
 
     for (i in 1:nboots){
         idx <- sample(N, replace=TRUE)
         fm.boot <- cancor.signfix(X[idx,], Y[idx,])
         rho.boot[,i] <- fm.boot$cor
-        beta.boot[,,i] <- fm.boot$ycoef
         alpha.boot[,,i] <- fm.boot$xcoef
+        beta.boot[,,i] <- fm.boot$ycoef
     }
     
 }
