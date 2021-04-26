@@ -15,7 +15,8 @@ bootstrapcca <- function(X, Y, level = .05, nboots = 1e3){
     py <- ncol(Y)
     K <- min(px, py)
 
-    fm <- cancor.signfix(X, Y)
+    fm <- cancor(X, Y)
+    fm <- cancor.signfix(fm)
     rho.hat <- fm$cor
     beta.hat <- fm$ycoef
     alpha.hat <- fm$xcoef
@@ -26,7 +27,8 @@ bootstrapcca <- function(X, Y, level = .05, nboots = 1e3){
 
     for (i in 1:nboots){
         idx <- sample(N, replace=TRUE)
-        fm.boot <- cancor.signfix(X[idx,], Y[idx,])
+        fm.boot <- cancor(X[idx,], Y[idx,])
+        fm.boot <- cancor.signfix(fm)
         rho.boot[,i] <- fm.boot$cor
         alpha.boot[,,i] <- fm.boot$xcoef
         beta.boot[,,i] <- fm.boot$ycoef
@@ -66,27 +68,26 @@ bootstrapcca <- function(X, Y, level = .05, nboots = 1e3){
     
 }
 
-##' Compute canonical correlations between two data matrices, but
-##' impose identifiability conditions so the signs are fixed rather
-##' than random
+##' Correct sign ambiguity in canonical correlation analysis
+##'
 ##'
 ##' Canonical Correlation Analysis suffers from sign ambiguity in the
-##' estimated coefficients. This is because Corr(U, V) = Corr(-U, -V)
-##' and relatedly obtains from the SVD decomposition typically used to
-##' solve the CCA problem. This function adopts the convention that
-##' each canonical coefficient pair (xcoef, ycoef) should satisfy the
-##' condition that its maximal element (in absolute value) has
-##' positive sign. You may wish to standardize the columns of X and Y
-##' prior to calling this function so that differences in variable
-##' scaling do not dominate the identity of the maximal element.
-##' @title Sign-Fixed Canonical Correlations
-##' @param ... Arguments passed on to cancor
+##' estimated coefficients. This is because Corr(U, V) = Corr(-U, -V).
+##' This function adopts the convention that each canonical
+##' coefficient pair (xcoef, ycoef) should satisfy the condition that
+##' its maximal element (in absolute value) has positive sign. You may
+##' wish to standardize the columns of X and Y prior to initially
+##' fitting CCA so that differences in variable scaling do not
+##' dominate the identity of the maximal element.
+##'
+##' Note: This only cares about and tries to fix sign ambiguities in
+##' the first K=min(px,py) components.
+##' @title Fix Cancor Signs
+##' @param fm A fitted object returned by cancor
 ##' @return Same object as returned by cancor after sign-flipping per
 ##'     the identifiability condition discussed in Details.
 ##' @author Daniel Kessler
-cancor.signfix <- function(...){
-    fm <- cancor(...)
-
+cancor.signfix <- function(fm){
     K <- min(ncol(fm$xcoef), ncol(fm$ycoef))
 
     theta <- rbind(fm$xcoef[,1:K], fm$ycoef[,1:K])
