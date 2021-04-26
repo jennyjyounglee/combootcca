@@ -16,7 +16,7 @@ bootstrapcca <- function(X, Y, level = .05, nboots = 1e3){
     K <- min(px, py)
 
     fm <- cancor(X, Y)
-    fm <- cancor.signfix(fm)
+    fm <- cancor.scalefix(cancor.signfix(fm))
     rho.hat <- fm$cor
     beta.hat <- fm$ycoef
     alpha.hat <- fm$xcoef
@@ -28,7 +28,7 @@ bootstrapcca <- function(X, Y, level = .05, nboots = 1e3){
     for (i in 1:nboots){
         idx <- sample(N, replace=TRUE)
         fm.boot <- cancor(X[idx,], Y[idx,])
-        fm.boot <- cancor.signfix(fm)
+        fm.boot <- cancor.scalefix(cancor.signfix(fm))
         rho.boot[,i] <- fm.boot$cor
         alpha.boot[,,i] <- fm.boot$xcoef
         beta.boot[,,i] <- fm.boot$ycoef
@@ -101,6 +101,29 @@ cancor.signfix <- function(fm){
 
     return(fm)
     
+}
+
+##' Adjust canonical correlation analysis results so that canonical
+##' variates have unit variance
+##'
+##' Cancor uses the Golub and Van Loan algorithm, which yields
+##' canonical variates that have unit norm rather than unit variance.
+##' As a result, the canonical variates will have (empirical) variance
+##' of 1/(N-1), where N is the number of observations. This is
+##' undesirable if we wish to perform inference on the weights in
+##' xcoef or ycoef, because their scale will vary with N.
+##'
+##' This function simply multiplies both xcoef and ycoef by sqrt(N-1)
+##' so that the resulting canonical variates will indeed have unit variance.
+##' @title Fix Cancor Scaling
+##' @param fm A fitted object returned by cancor
+##' @param N The number of observations
+##' @return A modified version of fm
+##' @author Daniel Kessler
+cancor.scalefix <- function(fm, N){
+    fm$xcoef <- sqrt(N-1) * fm$xcoef
+    fm$ycoef <- sqrt(N-1) * fm$ycoef
+    return(fm)
 }
 
 ##' Return the (signed) value of the maximum (in magnitude) element of a vector
