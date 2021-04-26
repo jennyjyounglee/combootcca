@@ -44,7 +44,25 @@ bootstrapcca <- function(X, Y, level = .05, nboots = 1e3){
                     dim = c(K, 3),
                     dimnames = list(Component = 1:K, Interval = c("Lower", "Estimate", "Upper")))
 
+    alpha.ci <- array(c(
+        alpha.hat - alpha.t,
+        alpha.hat,
+        alpha.hat + alpha.t),
+        dim = c(dim(alpha.hat), 3),
+        dimnames = list(Coordinate = 1:px, Component = 1:px, Interval = c("Lower", "Estimate", "Upper")))
+    alpha.ci <- alpha.ci[,1:K,] # only worry about K components
 
+    beta.ci <- array(c(
+        beta.hat - beta.t,
+        beta.hat,
+        beta.hat + beta.t),
+        dim = c(dim(beta.hat), 3),
+        dimnames = list(Coordinate = 1:py, Component = 1:py, Interval = c("Lower", "Estimate", "Upper")))
+
+    beta.ci <- beta.ci[,1:K,] # only worry about K components
+
+    CIs = list(rho = rho.ci, alpha = alpha.ci, beta = beta.ci)
+    return(CIs)
     
 }
 
