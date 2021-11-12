@@ -14,7 +14,7 @@ cca_ci_asymptotic <- function(x, y, level = .95) {
   K <- min(p, q)
 
   fm <- cancor(x, y) # fit the CCA model
-  fm <- cancor.scalefix(fm, n)
+  fm <- cancor_scalefix(fm, n)
   fm$xcoef <- fm$xcoef[, 1:K]
   fm$ycoef <- fm$ycoef[, 1:K]
 
@@ -81,3 +81,4 @@ cca_ci_asymptotic <- function(x, y, level = .95) {
 
 snake_case <- function(a) {
 }
+

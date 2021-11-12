@@ -1,4 +1,4 @@
-##' Bootstrap data and 
+##' Bootstrap data and
 ##'
 ##' .. content for \details{} ..
 ##' @title bootstrap CCA with Sign Fixing
@@ -6,66 +6,64 @@
 ##' @param Y Data matrix of size N by q
 ##' @param level Level for confidence intervals, should be in (0, 1)
 ##' @param nboots Number of bootstrap sample to draw
-##' @return 
+##' @return
 ##' @author Daniel Kessler
 ##' @export
-bootstrapcca <- function(X, Y, level = .05, nboots = 1e3){
-    N <- nrow(X)
-    px <- ncol(X)
-    py <- ncol(Y)
-    K <- min(px, py)
+cca_ci_bootstrap <- function(x, y, level = .05, nboots = 1e3) {
+  n <- nrow(x)
+  p <- ncol(x)
+  q <- ncol(y)
+  K <- min(p, q)
 
-    fm <- cancor(X, Y)
-    fm <- cancor.scalefix(cancor.signfix(fm))
-    rho.hat <- fm$cor
-    beta.hat <- fm$ycoef
-    alpha.hat <- fm$xcoef
+  fm <- cancor_scalefix(cancor(x, y), n)
+  K <- length(fm$cor)
+  
+  rho_hat <- fm$cor
+  xcoef_hat <- fm$xcoef[, 1:K]
+  ycoef_hat <- fm$ycoef[, 1:K]
 
-    rho.boot <- array(dim=c(length(rho.hat),nboots))
-    alpha.boot <- array(dim=c(dim(alpha.hat),nboots))
-    beta.boot <- array(dim=c(dim(beta.hat),nboots))
+  rho_boot <- array(dim = c(length(rho_hat), nboots))
+  xcoef_boot <- array(dim = c(dim(xcoef_hat), nboots))
+  ycoef_boot <- array(dim = c(dim(ycoef_hat), nboots))
 
-    for (i in 1:nboots){
-        idx <- sample(N, replace=TRUE)
-        fm.boot <- cancor(X[idx,], Y[idx,])
-        fm.boot <- cancor.scalefix(cancor.signfix(fm))
-        rho.boot[,i] <- fm.boot$cor
-        alpha.boot[,,i] <- fm.boot$xcoef
-        beta.boot[,,i] <- fm.boot$ycoef
-    }
+  for (i in 1:nboots) {
+    idx <- sample(n, replace = TRUE)
+    fm_boot <- cancor_scalefix(cancor(x[idx, ], y[idx, ]), n)
+    rho_boot[, i] <- fm_boot$cor
+    xcoef_boot[, , i] <- fm_boot$xcoef[, 1:K]
+    ycoef_boot[, , i] <- fm_boot$ycoef[, 1:K]
+  }
 
-    rho.dist  <- abs(sweep(rho.boot, c(1), rho.hat))
-    alpha.dist <- abs(sweep(alpha.boot, c(1, 2), alpha.hat))
-    beta.dist <- abs(sweep(beta.boot, c(1, 2), beta.hat))
+  rho_dist <- abs(sweep(rho_boot, c(1), rho_hat))
+  xcoef_dist <- abs(sweep(xcoef_boot, c(1, 2), xcoef_hat))
+  ycoef_dist <- abs(sweep(ycoef_boot, c(1, 2), ycoef_hat))
 
-    rho.t <- apply(rho.dist, 1, quantile, probs = level)
-    alpha.t <- apply(alpha.dist, c(1,2), quantile, probs = level)
-    beta.t <- apply(beta.dist, c(1,2), quantile, probs = level)
+  rho_t <- apply(rho_dist, 1, quantile, probs = level)
+  xcoef_t <- apply(xcoef_dist, c(1, 2), quantile, probs = level)
+  ycoef_t <- apply(ycoef_dist, c(1, 2), quantile, probs = level)
 
-    rho.ci <- array(c(rho.hat - rho.t, rho.hat, rho.hat + rho.t),
-                    dim = c(K, 3),
-                    dimnames = list(Component = 1:K, Interval = c("Lower", "Estimate", "Upper")))
+  rho_ci <- array(c(rho_hat - rho_t, rho_hat, rho_hat + rho_t),
+    dim = c(K, 3),
+    dimnames = list(Component = 1:K, Interval = c("Lower", "Estimate", "Upper"))
+  )
 
-    alpha.ci <- array(c(
-        alpha.hat - alpha.t,
-        alpha.hat,
-        alpha.hat + alpha.t),
-        dim = c(dim(alpha.hat), 3),
-        dimnames = list(Coordinate = 1:px, Component = 1:px, Interval = c("Lower", "Estimate", "Upper")))
-    alpha.ci <- alpha.ci[,1:K,] # only worry about K components
+  xcoef_ci <- array(NA, c(p, K, 2),
+    dimnames = list(NULL, NULL, paste(c(100 * (1 - level), 100 * level), "%"))
+  )
 
-    beta.ci <- array(c(
-        beta.hat - beta.t,
-        beta.hat,
-        beta.hat + beta.t),
-        dim = c(dim(beta.hat), 3),
-        dimnames = list(Coordinate = 1:py, Component = 1:py, Interval = c("Lower", "Estimate", "Upper")))
+  ycoef_ci <- array(NA, c(q, K, 2),
+    dimnames = list(NULL, NULL, paste(c(100 * (1 - level), 100 * level), "%"))
+  )
 
-    beta.ci <- beta.ci[,1:K,] # only worry about K components
+  xcoef_ci[, , 1] <- xcoef_hat - xcoef_t
+  xcoef_ci[, , 1] <- xcoef_hat + xcoef_t
 
-    CIs = list(rho = rho.ci, alpha = alpha.ci, beta = beta.ci)
-    return(CIs)
-    
+  ycoef_ci[, , 1] <- ycoef_hat - ycoef_t
+  ycoef_ci[, , 1] <- ycoef_hat + ycoef_t
+
+
+  res <- list(xcoef_ci = xcoef_ci, ycoef_ci = ycoef_ci)
+  return(res)
 }
 
 ##' Correct sign ambiguity in canonical correlation analysis
@@ -87,20 +85,19 @@ bootstrapcca <- function(X, Y, level = .05, nboots = 1e3){
 ##' @return Same object as returned by cancor after sign-flipping per
 ##'     the identifiability condition discussed in Details.
 ##' @author Daniel Kessler
-cancor.signfix <- function(fm){
-    K <- min(ncol(fm$xcoef), ncol(fm$ycoef))
+cancor_signfix <- function(fm) {
+  K <- min(ncol(fm$xcoef), ncol(fm$ycoef))
 
-    theta <- rbind(fm$xcoef[,1:K], fm$ycoef[,1:K])
-    
-    maxes <- apply(theta, 2, absmax)
+  theta <- rbind(fm$xcoef[, 1:K], fm$ycoef[, 1:K])
 
-    flip <- diag(sign(maxes))
+  maxes <- apply(theta, 2, absmax)
 
-    fm$xcoef[,1:K] <- fm$xcoef[,1:K] %*% flip
-    fm$ycoef[,1:K] <- fm$ycoef[,1:K] %*% flip
+  flip <- diag(sign(maxes))
 
-    return(fm)
-    
+  fm$xcoef[, 1:K] <- fm$xcoef[, 1:K] %*% flip
+  fm$ycoef[, 1:K] <- fm$ycoef[, 1:K] %*% flip
+
+  return(fm)
 }
 
 ##' Adjust canonical correlation analysis results so that canonical
@@ -120,10 +117,10 @@ cancor.signfix <- function(fm){
 ##' @param N The number of observations
 ##' @return A modified version of fm
 ##' @author Daniel Kessler
-cancor.scalefix <- function(fm, N){
-    fm$xcoef <- sqrt(N-1) * fm$xcoef
-    fm$ycoef <- sqrt(N-1) * fm$ycoef
-    return(fm)
+cancor_scalefix <- function(fm, N) {
+  fm$xcoef <- sqrt(N - 1) * fm$xcoef
+  fm$ycoef <- sqrt(N - 1) * fm$ycoef
+  return(fm)
 }
 
 ##' Compute the Canonical Correlation Analysis solution based on a
@@ -155,25 +152,25 @@ cancor.scalefix <- function(fm, N){
 ##' ycoef: estimated coefficients for the y variables
 ##' @author Daniel Kessler
 ##' @export
-cancor.cov <- function(Sigma, px){
-    p <- nrow(Sigma)
-    sxx <- Sigma[1:px,1:px]
-    syy <- Sigma[(px+1):p,(px+1):p]
-    syx <- Sigma[(px+1):p,1:px]
+cancor.cov <- function(Sigma, px) {
+  p <- nrow(Sigma)
+  sxx <- Sigma[1:px, 1:px]
+  syy <- Sigma[(px + 1):p, (px + 1):p]
+  syx <- Sigma[(px + 1):p, 1:px]
 
-    sxx.sqrti <- solve(expm::sqrtm(sxx))
-    syy.sqrti <- solve(expm::sqrtm(syy))
+  sxx.sqrti <- solve(expm::sqrtm(sxx))
+  syy.sqrti <- solve(expm::sqrtm(syy))
 
-    SVD <- svd(syy.sqrti %*% syx %*% sxx.sqrti)
+  SVD <- svd(syy.sqrti %*% syx %*% sxx.sqrti)
 
-    rho <- SVD$d
-    xcoef <- sxx.sqrti %*% SVD$v
-    ycoef <- syy.sqrti %*% SVD$u
+  rho <- SVD$d
+  xcoef <- sxx.sqrti %*% SVD$v
+  ycoef <- syy.sqrti %*% SVD$u
 
-    svd(Sigma)
-    fm <- list(cor = rho, xcoef = xcoef, ycoef = ycoef)
-    fm <- cancor.signfix(fm)
-    return(fm)
+  svd(Sigma)
+  fm <- list(cor = rho, xcoef = xcoef, ycoef = ycoef)
+  fm <- cancor_signfix(fm)
+  return(fm)
 }
 
 ##' Return the (signed) value of the maximum (in magnitude) element of a vector
@@ -184,6 +181,6 @@ cancor.cov <- function(Sigma, px){
 ##' @param x
 ##' @return the signed maximum
 ##' @author Daniel Kessler
-absmax <- function(x){
-    x[which.max( abs(x) )]
+absmax <- function(x) {
+  x[which.max(abs(x))]
 }
