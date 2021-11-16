@@ -25,6 +25,7 @@
 ##'   CCA directions
 ##' @return List with two objects: xcoef_ci and ycoef_ci.
 ##' @author Dan Kessler
+##' @export
 cca_ci_regression <- function(x, y, level = .95, train_ratio = 0.5) {
   n <- nrow(x)
   p <- ncol(x)

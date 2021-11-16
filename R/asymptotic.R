@@ -7,6 +7,7 @@
 ##' @param level Level for confidence intervals, should be in (0, 1)
 ##' @return List with two objects: xcoef_ci and ycoef_ci.
 ##' @author Dan Kessler
+##' @export
 cca_ci_asymptotic <- function(x, y, level = .95) {
   n <- nrow(x)
   p <- ncol(x)
