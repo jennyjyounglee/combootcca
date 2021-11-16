@@ -1,9 +1,9 @@
 ##' Bootstrap data and
 ##'
 ##' .. content for \details{} ..
-##' @title bootstrap CCA with Sign Fixing
-##' @param X Data matrix of size N by p
-##' @param Y Data matrix of size N by q
+##' @title Bootstrap-based confidence intervals for CCA directions
+##' @param x Data matrix of size N by p
+##' @param y Data matrix of size N by q
 ##' @param level Level for confidence intervals, should be in (0, 1)
 ##' @param nboots Number of bootstrap sample to draw
 ##' @return
@@ -13,11 +13,10 @@ cca_ci_bootstrap <- function(x, y, level = .05, nboots = 1e3) {
   n <- nrow(x)
   p <- ncol(x)
   q <- ncol(y)
-  K <- min(p, q)
 
   fm <- cancor_scalefix(cancor(x, y), n)
   K <- length(fm$cor)
-  
+
   rho_hat <- fm$cor
   xcoef_hat <- fm$xcoef[, 1:K]
   ycoef_hat <- fm$ycoef[, 1:K]
