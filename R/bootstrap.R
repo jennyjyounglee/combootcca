@@ -9,10 +9,13 @@
 ##' @param parametric If FALSE (default), do bootstrap by sampling with
 ##'   replacement. If TRUE, perform parametric bootstrap, i.e., draw data from
 ##'   multivariate normal distribution following sample covariance
+##' @param progress If 0 (default), don't report progress. If set to a positive
+##'   integer k, report bootstrap progress every k'th run.
 ##' @return
 ##' @author Daniel Kessler
 ##' @export
-cca_ci_bootstrap <- function(x, y, level = .05, nboots = 1e3, parametric = FALSE) {
+cca_ci_bootstrap <- function(x, y, level = .05, nboots = 1e3, parametric = FALSE,
+                             progress = 0) {
   n <- nrow(x)
   p <- ncol(x)
   q <- ncol(y)
@@ -29,6 +32,10 @@ cca_ci_bootstrap <- function(x, y, level = .05, nboots = 1e3, parametric = FALSE
   ycoef_boot <- array(dim = c(dim(ycoef_hat), nboots))
 
   for (i in 1:nboots) {
+    if (progress && !(i %% progress)) {
+      progress_message <- sprintf("Running bootstrap %d of %d", i, nboots)
+      print(progress_message)
+    }
     idx <- sample(n, replace = TRUE)
     if (!parametric) {
       idx <- sample(n, replace = TRUE)
