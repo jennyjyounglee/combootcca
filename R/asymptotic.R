@@ -1,7 +1,7 @@
-##' .. content for \description{} (no empty lines) ..
+##' Obtain confidence intervals for the "directions" of a canonical correlation
+##' analysis using asymptotic results from Anderson 1999.
 ##'
-##' .. content for \details{} ..
-##' @title Asymptotic Confidence Intervals for CCA Directions
+##' @title Asymptotic confidence intervals for CCA directions
 ##' @param x Data matrix of size n by p
 ##' @param y Data matrix of size n by q
 ##' @param level Level for confidence intervals, should be in (0, 1)
