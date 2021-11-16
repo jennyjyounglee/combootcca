@@ -55,9 +55,6 @@ cca_ci_asymptotic <- function(x, y, level = .95) {
 
     zcrit <- - qnorm((1 - level) / 2)
 
-  xci_lower <- fm$xcoef - sqrt(xvar / n) * zcrit
-  xci_upper <- fm$xcoef + sqrt(xvar / n) * zcrit
-
   xcoef_ci <- array(NA, c(p, K, 2),
     dimnames = list(NULL, NULL, paste(c(100 * (1 - level), 100 * level), "%"))
   )
@@ -77,8 +74,3 @@ cca_ci_asymptotic <- function(x, y, level = .95) {
   res <- list(xcoef_ci = xcoef_ci, ycoef_ci = ycoef_ci)
   return(res)
 }
-
-
-snake_case <- function(a) {
-}
-
