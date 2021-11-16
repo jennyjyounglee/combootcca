@@ -70,10 +70,10 @@ cca_ci_bootstrap <- function(x, y, level = .05, nboots = 1e3, parametric = FALSE
   )
 
   xcoef_ci[, , 1] <- xcoef_hat - xcoef_t
-  xcoef_ci[, , 1] <- xcoef_hat + xcoef_t
+  xcoef_ci[, , 2] <- xcoef_hat + xcoef_t
 
   ycoef_ci[, , 1] <- ycoef_hat - ycoef_t
-  ycoef_ci[, , 1] <- ycoef_hat + ycoef_t
+  ycoef_ci[, , 2] <- ycoef_hat + ycoef_t
 
 
   res <- list(xcoef_ci = xcoef_ci, ycoef_ci = ycoef_ci)
