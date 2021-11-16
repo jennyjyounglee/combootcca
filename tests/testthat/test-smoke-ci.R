@@ -8,5 +8,6 @@ test_that("All methods for CCA confidence intervals run without errors", {
 
   expect_error(cca_ci_asymptotic(x, y), NA)
   expect_error(cca_ci_regression(x, y), NA)
-  expect_error(cca_ci_bootstrap(x, y), NA)
+  expect_error(cca_ci_bootstrap(x, y, parametric = FALSE), NA)
+  expect_error(cca_ci_bootstrap(x, y, parametric = TRUE), NA)
 })

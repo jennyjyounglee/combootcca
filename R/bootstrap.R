@@ -6,10 +6,13 @@
 ##' @param y Data matrix of size N by q
 ##' @param level Level for confidence intervals, should be in (0, 1)
 ##' @param nboots Number of bootstrap sample to draw
+##' @param parametric If FALSE (default), do bootstrap by sampling with
+##'   replacement. If TRUE, perform parametric bootstrap, i.e., draw data from
+##'   multivariate normal distribution following sample covariance
 ##' @return
 ##' @author Daniel Kessler
 ##' @export
-cca_ci_bootstrap <- function(x, y, level = .05, nboots = 1e3) {
+cca_ci_bootstrap <- function(x, y, level = .05, nboots = 1e3, parametric = FALSE) {
   n <- nrow(x)
   p <- ncol(x)
   q <- ncol(y)
@@ -27,7 +30,19 @@ cca_ci_bootstrap <- function(x, y, level = .05, nboots = 1e3) {
 
   for (i in 1:nboots) {
     idx <- sample(n, replace = TRUE)
-    fm_boot <- cancor_scalefix(cancor(x[idx, ], y[idx, ]), n)
+    if (!parametric) {
+      idx <- sample(n, replace = TRUE)
+      fm_boot <- cancor_scalefix(cancor(x[idx, ], y[idx, ]), n)
+    } else {
+      if (i == 1) { # only compute cholesky once
+        sigma_hat <- cov(cbind(x, y))
+        l_hat <- chol(sigma_hat)
+      }
+      newdata <- t(l_hat %*% matrix(rnorm(n * (p + q)), p + q, n))
+      x_boot <- newdata[, 1:p]
+      y_boot <- newdata[, (p + 1):(p + q)]
+      fm_boot <- cancor_scalefix(cancor(x_boot, y_boot), n)
+    }
     rho_boot[, i] <- fm_boot$cor
     xcoef_boot[, , i] <- fm_boot$xcoef[, 1:K]
     ycoef_boot[, , i] <- fm_boot$ycoef[, 1:K]
