@@ -5,17 +5,21 @@
 ##' @param x Data matrix of size n by p
 ##' @param y Data matrix of size n by q
 ##' @param level Level for confidence intervals, should be in (0, 1)
+##' @param align A function to perform post-processing on the estimated
+##'   coefficients to render the solution well-identified. By default, this uses
+##'   cancor_signfix_diag, which ensures that the diagonal of xcoef is
+##'   non-negative.
 ##' @return List with two objects: xcoef_ci and ycoef_ci.
 ##' @author Dan Kessler
 ##' @export
-cca_ci_asymptotic <- function(x, y, level = .95) {
+cca_ci_asymptotic <- function(x, y, level = .95, align = cancor_signfix_diag) {
   n <- nrow(x)
   p <- ncol(x)
   q <- ncol(y)
   K <- min(p, q)
 
   fm <- cancor(x, y) # fit the CCA model
-  fm <- cancor_scalefix(fm, n)
+  fm <- align(cancor_scalefix(fm, n))
   fm$xcoef <- fm$xcoef[, 1:K]
   fm$ycoef <- fm$ycoef[, 1:K]
 
