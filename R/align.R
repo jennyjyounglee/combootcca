@@ -1,5 +1,24 @@
 ## functions related to aligning CCA solutions
 
+##' Correct sign ambiguity in canonical correlation analysis by requiring that
+##' the diagonal of xcoef be non-negative (this is the approach suggested by
+##' Anderson 1999). This will also truncate both xcoef and ycoef to have the
+##' same number of columns as the length of cor
+##'
+##' @title Fix cancor signs based on the diagonal
+##' @param fm A fitted object returned by cancor (or similar)
+##' @return Object like fm but with possible sign flips
+##' @author Dan Kessler
+cancor_signfix_diag <- function(fm) {
+  k <- length(fm$cor)
+  fm$xcoef <- fm$xcoef[, 1:k]
+  fm$ycoef <- fm$ycoef[, 1:k]
+  signs <- diag(sign(diag(fm$xcoef)))
+  fm$xcoef <- fm$xcoef %*% signs
+  fm$ycoef <- fm$ycoef %*% signs
+  return(fm)
+}
+
 ##' Correct sign ambiguity in canonical correlation analysis
 ##'
 ##'
@@ -14,12 +33,12 @@
 ##'
 ##' Note: This only cares about and tries to fix sign ambiguities in
 ##' the first K=min(px,py) components.
-##' @title Fix Cancor Signs
+##' @title Fix cancor signs based on the max entry in each column
 ##' @param fm A fitted object returned by cancor
 ##' @return Same object as returned by cancor after sign-flipping per
 ##'     the identifiability condition discussed in Details.
 ##' @author Daniel Kessler
-cancor_signfix <- function(fm) {
+cancor_signfix_max <- function(fm) {
   K <- min(ncol(fm$xcoef), ncol(fm$ycoef))
 
   theta <- rbind(fm$xcoef[, 1:K], fm$ycoef[, 1:K])
