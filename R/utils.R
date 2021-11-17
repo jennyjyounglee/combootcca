@@ -56,7 +56,7 @@ cancor.cov <- function(Sigma, px, align = cancor_signfix_diag) {
 ##' An example is especially illustrative. absmax(c(1,-3,2)) will
 ##' yield -3. absmax(c(1,-2,3)) will yield 3.
 ##' @title Find Maximum Magnitude Element of Vector
-##' @param x
+##' @param x A vector
 ##' @return the signed maximum
 ##' @author Daniel Kessler
 absmax <- function(x) {

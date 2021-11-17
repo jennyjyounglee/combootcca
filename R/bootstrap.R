@@ -1,6 +1,5 @@
-##' Bootstrap data and
+##' Bootstrap data to generate CCA confidence intervals
 ##'
-##' .. content for \details{} ..
 ##' @title Bootstrap-based confidence intervals for CCA directions
 ##' @param x Data matrix of size N by p
 ##' @param y Data matrix of size N by q
