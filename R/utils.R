@@ -14,13 +14,13 @@
 ##' covariance Sigma. This algorithm results in canonical variates
 ##' that have unit empirical variance.
 ##'
-##' Note: As a convenience to the user, this function will also fix
-##' the signs of the resulting coefficients as described in
-##' cancor.signfix.
 ##' @title Canonical Correlation Analysis for Covariance Matrix
-##' @param Sigma A PSD matrix given the covariance (sample or
-##'     population)
+##' @param Sigma A PSD matrix given the covariance (sample or population)
 ##' @param px The number of variables in the x dataset
+##' @param align A function to perform post-processing on the estimated
+##'   coefficients to render the solution well-identified. By default, this uses
+##'   cancor_signfix_diag, which ensures that the diagonal of xcoef is
+##'   non-negative.
 ##' @return A list containing the following components:
 ##'
 ##' cor: correlations
@@ -30,7 +30,7 @@
 ##' ycoef: estimated coefficients for the y variables
 ##' @author Daniel Kessler
 ##' @export
-cancor.cov <- function(Sigma, px) {
+cancor.cov <- function(Sigma, px, align = cancor_signfix_diag) {
   p <- nrow(Sigma)
   sxx <- Sigma[1:px, 1:px]
   syy <- Sigma[(px + 1):p, (px + 1):p]
@@ -47,7 +47,7 @@ cancor.cov <- function(Sigma, px) {
 
   svd(Sigma)
   fm <- list(cor = rho, xcoef = xcoef, ycoef = ycoef)
-  fm <- cancor_signfix(fm)
+  fm <- align(fm)
   return(fm)
 }
 
