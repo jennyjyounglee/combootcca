@@ -56,12 +56,15 @@ cca_ci_asymptotic <- function(x, y, level = .95) {
 
     zcrit <- - qnorm((1 - level) / 2)
 
+  alpha <- 1 - level
+  ci_levels <- paste(c(100 * alpha / 2, 100 * (1 - alpha / 2)), "%")
+
   xcoef_ci <- array(NA, c(p, K, 2),
-    dimnames = list(NULL, NULL, paste(c(100 * (1 - level), 100 * level), "%"))
+                    dimnames = list(NULL, NULL, ci_levels)
   )
 
   ycoef_ci <- array(NA, c(q, K, 2),
-    dimnames = list(NULL, NULL, paste(c(100 * (1 - level), 100 * level), "%"))
+                    dimnames = list(NULL, NULL, ci_levels)
   )
 
   xcoef_ci[, , 1] <- fm$xcoef - sqrt(xvar / n) * zcrit

@@ -45,13 +45,15 @@ cca_ci_regression <- function(x, y, level = .95, train_ratio = 0.5) {
   x2scores <- x2 %*% fm1$xcoef[, 1:K]
   y2scores <- y2 %*% fm1$ycoef[, 1:K]
 
+  alpha <- 1 - level
+  ci_levels <- paste(c(100 * alpha / 2, 100 * (1 - alpha / 2)), "%")
 
   xcoef_ci <- array(NA, c(p, K, 2),
-    dimnames = list(NULL, NULL, paste(c(100 * (1 - level), 100 * level), "%"))
+                    dimnames = list(NULL, NULL, ci_levels)
   )
 
   ycoef_ci <- array(NA, c(q, K, 2),
-    dimnames = list(NULL, NULL, paste(c(100 * (1 - level), 100 * level), "%"))
+                    dimnames = list(NULL, NULL, ci_levels)
   )
 
   for (k in 1:K) {
