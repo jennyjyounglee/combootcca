@@ -4,7 +4,7 @@
 \alias{cca_ci_asymptotic}
 \title{Asymptotic confidence intervals for CCA directions}
 \usage{
-cca_ci_asymptotic(x, y, level = 0.95)
+cca_ci_asymptotic(x, y, level = 0.95, align = cancor_signfix_diag)
 }
 \arguments{
 \item{x}{Data matrix of size n by p}
@@ -12,6 +12,11 @@ cca_ci_asymptotic(x, y, level = 0.95)
 \item{y}{Data matrix of size n by q}
 
 \item{level}{Level for confidence intervals, should be in (0, 1)}
+
+\item{align}{A function to perform post-processing on the estimated
+coefficients to render the solution well-identified. By default, this uses
+cancor_signfix_diag, which ensures that the diagonal of xcoef is
+non-negative.}
 }
 \value{
 List with two objects: xcoef_ci and ycoef_ci.

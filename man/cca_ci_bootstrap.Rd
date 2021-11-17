@@ -4,7 +4,14 @@
 \alias{cca_ci_bootstrap}
 \title{Bootstrap-based confidence intervals for CCA directions}
 \usage{
-cca_ci_bootstrap(x, y, level = 0.05, nboots = 1000, parametric = FALSE)
+cca_ci_bootstrap(
+  x,
+  y,
+  level = 0.05,
+  nboots = 1000,
+  parametric = FALSE,
+  progress = 0
+)
 }
 \arguments{
 \item{x}{Data matrix of size N by p}
@@ -18,6 +25,9 @@ cca_ci_bootstrap(x, y, level = 0.05, nboots = 1000, parametric = FALSE)
 \item{parametric}{If FALSE (default), do bootstrap by sampling with
 replacement. If TRUE, perform parametric bootstrap, i.e., draw data from
 multivariate normal distribution following sample covariance}
+
+\item{progress}{If 0 (default), don't report progress. If set to a positive
+integer k, report bootstrap progress every k'th run.}
 }
 \value{
 

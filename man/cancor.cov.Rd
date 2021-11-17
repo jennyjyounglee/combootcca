@@ -4,13 +4,17 @@
 \alias{cancor.cov}
 \title{Canonical Correlation Analysis for Covariance Matrix}
 \usage{
-cancor.cov(Sigma, px)
+cancor.cov(Sigma, px, align = cancor_signfix_diag)
 }
 \arguments{
-\item{Sigma}{A PSD matrix given the covariance (sample or
-population)}
+\item{Sigma}{A PSD matrix given the covariance (sample or population)}
 
 \item{px}{The number of variables in the x dataset}
+
+\item{align}{A function to perform post-processing on the estimated
+coefficients to render the solution well-identified. By default, this uses
+cancor_signfix_diag, which ensures that the diagonal of xcoef is
+non-negative.}
 }
 \value{
 A list containing the following components:
@@ -35,10 +39,6 @@ matrix. This is especially useful if one wishes to solve the
 "population" version of CCA for a distribution with population
 covariance Sigma. This algorithm results in canonical variates
 that have unit empirical variance.
-
-Note: As a convenience to the user, this function will also fix
-the signs of the resulting coefficients as described in
-cancor.signfix.
 }
 \author{
 Daniel Kessler
