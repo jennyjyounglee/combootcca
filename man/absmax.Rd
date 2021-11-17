@@ -6,6 +6,9 @@
 \usage{
 absmax(x)
 }
+\arguments{
+\item{x}{A vector}
+}
 \value{
 the signed maximum
 }

@@ -33,10 +33,7 @@ integer k, report bootstrap progress every k'th run.}
 
 }
 \description{
-Bootstrap data and
-}
-\details{
-.. content for \details{} ..
+Bootstrap data to generate CCA confidence intervals
 }
 \author{
 Daniel Kessler
