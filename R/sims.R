@@ -32,10 +32,11 @@ sim.coverage.check <- function(n, px, py) {
 coverage_experiment <- function(outreps, inreps, p, q, n,
                                 ci_method = cca_ci_asymptotic, ...) {
   K <- min(p, q)
+  coord_names <- c(paste0("X_", 1:p), paste0("Y_", 1:q))
 
   cis <- array(NA, c((p + q), K, 2, inreps, outreps),
     dimnames = list(
-      coordinate = 1:(p + q),
+      coordinate = coord_names,
       component = 1:K,
       quantity = c("lower", "upper"),
       inreps = 1:inreps,
@@ -45,7 +46,7 @@ coverage_experiment <- function(outreps, inreps, p, q, n,
 
   truth <- array(NA, c((p + q), K, inreps, outreps),
     dimnames = list(
-      coordinate = 1:(p + q),
+      coordinate = coord_names,
       component = 1:K,
       inreps = 1:inreps,
       outreps = 1:outreps
@@ -75,7 +76,7 @@ coverage_experiment <- function(outreps, inreps, p, q, n,
   ## Fix dims and dimnames of cover
   dim(cover) <- c((p + q), K, inreps, outreps)
   dimnames(cover) <- list(
-    coordinate = 1:(p + q),
+    coordinate = coord_names,
     component = 1:K,
     inreps = 1:inreps,
     outreps = 1:outreps
