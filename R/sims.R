@@ -16,70 +16,74 @@ sim.coverage.check <- function(n, px, py) {
 ##' @param p The dimension of X
 ##' @param q The dimension of Y
 ##' @param n How many datapoints to draw in each sample
-##' @return A big array with all of the results. The array has the following
-##'   dimensions: outreps by inreps by (p + q) by K by 3. The last dimension
-##'   holds the lower CI estimates, upper CI estimates, and true values,
-##'   respectively.
+##' @param ci_method A method for constructing CCA confidence intervals. Needs
+##'   an API-like cca_ci_asymptotic (the default)
+##' @param ... additional arguments passed on to ci_method
+##' @return A list of results, containing: (1) cis, a 5 dimensional array of
+##'   confidence intervals, (2) truth, a 4 dimensional array that holds the true
+##'   values (3) cover, a 4 dimensional array indicating which cis cover the
+##'   truth, and (4) sigma, a list of length outreps that holds the generative
+##'   Sigma. For each of the arrays, the first two dimensions are coordinates (p
+##'   + q) and then components (K), and the last two dimensions are inreps and
+##'   then outreps. For cis, the middle dimension holds lower and upper
+##'   confidence bounds, respectively.
 ##' @export
 ##' @author Dan Kessler
-coverage_experiment <- function(outreps, inreps, p, q, n) {
+coverage_experiment <- function(outreps, inreps, p, q, n,
+                                ci_method = cca_ci_asymptotic, ...) {
   K <- min(p, q)
-  output <- array(NA, c(outreps, inreps, (p + q), K, 3),
+
+  cis <- array(NA, c((p + q), K, 2, inreps, outreps),
     dimnames = list(
-      outreps = NULL,
-      inreps = NULL,
-      coordinate = NULL,
-      component = NULL,
-      quantity = c("lower", "upper", "truth")
+      coordinate = 1:(p + q),
+      component = 1:K,
+      quantity = c("lower", "upper"),
+      inreps = 1:inreps,
+      outreps = 1:outreps
     )
   )
 
+  truth <- array(NA, c((p + q), K, inreps, outreps),
+    dimnames = list(
+      coordinate = 1:(p + q),
+      component = 1:K,
+      inreps = 1:inreps,
+      outreps = 1:outreps
+    )
+  )
+
+  sigma <- list()
+
   for (i in 1:outreps) {
-    sigma <- gen_sigma(p, q)
-    fm_true <- cancor.cov(sigma, px = p)
+    sigma[[i]] <- gen_sigma(p, q)
+    fm_true <- cancor.cov(sigma[[i]], px = p)
     for (j in 1:inreps) {
-      dat <- gen_data(sigma, p, q, n)
-      output[i, j, 1:p, , 3] <- fm_true$xcoef
-      output[i, j, (p + 1):(p + q), , 3] <- fm_true$ycoef
-      ci_asymptotic <- cca_ci_asymptotic(dat$x, dat$y)
-      output[i, j, 1:p, , 1] <- ci_asymptotic$xcoef[, , 1]
-      output[i, j, 1:p, , 2] <- ci_asymptotic$xcoef[, , 2]
-      output[i, j, (p + 1):(p + q), , 1] <- ci_asymptotic$ycoef[, , 1]
-      output[i, j, (p + 1):(p + q), , 2] <- ci_asymptotic$ycoef[, , 2]
+      dat <- gen_data(sigma[[i]], p, q, n)
+      truth[1:p, , j, i] <- fm_true$xcoef
+      truth[(p + 1):(p + q), , j, i] <- fm_true$ycoef
+      ci_estimates <- ci_method(dat$x, dat$y, ...)
+      cis[1:p, , 1, j, i] <- ci_estimates$xcoef[, , 1]
+      cis[1:p, , 2, j, i] <- ci_estimates$xcoef[, , 2]
+      cis[(p + 1):(p + q), , 1, j, i] <- ci_estimates$ycoef[, , 1]
+      cis[(p + 1):(p + q), , 2, j, i] <- ci_estimates$ycoef[, , 2]
     }
   }
-  return(output)
+
+  cover <- cis[, , 1, , ] <= drop(truth) &
+    drop(truth) <= cis[, , 2, , ]
+
+  ## Fix dims and dimnames of cover
+  dim(cover) <- c((p + q), K, inreps, outreps)
+  dimnames(cover) <- list(
+    coordinate = 1:(p + q),
+    component = 1:K,
+    inreps = 1:inreps,
+    outreps = 1:outreps
+  )
+
+  return(list(cis = cis, truth = truth, cover = cover, sigma = sigma))
 }
 
-coverage_asymptotic <- function(n, p, q, reps) {
-  sigma <- gen_sigma(p, q)
-
-  sigma_r <- chol(sigma)
-  fm_true <- cancor.cov(sigma, px = p)
-
-  cover <- list()
-  cover$x <- array(NA, c(dim(fm_true$xcoef), reps))
-  cover$y <- array(NA, c(dim(fm_true$ycoef), reps))
-
-  for (i in 1:reps) {
-    sigma <- gen_sigma(p, q)
-    sigma_r <- chol(sigma)
-    fm_true <- cancor.cov(sigma, px = p)
-
-    newdata <- t(t(sigma_r) %*% matrix(rnorm(n * (p + q)), p + q, n))
-    x <- newdata[, 1:p]
-    y <- newdata[, (p + 1):(p + q)]
-
-    ci_asymptotic <- cca_ci_asymptotic(x, y)
-
-    cover$x[, , i] <- ci_asymptotic$xcoef[, , 1] < fm_true$xcoef &
-      fm_true$xcoef < ci_asymptotic$xcoef[, , 2]
-
-    cover$y[, , i] <- ci_asymptotic$ycoef[, , 1] < fm_true$ycoef &
-      fm_true$ycoef < ci_asymptotic$ycoef[, , 2]
-  }
-  return(cover)
-}
 
 gen_data <- function(Sigma, p, q, n) {
   Sigma_r <- chol(Sigma)
