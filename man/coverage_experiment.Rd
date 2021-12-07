@@ -4,7 +4,15 @@
 \alias{coverage_experiment}
 \title{Conduct asymptotic coverage experiment}
 \usage{
-coverage_experiment(outreps, inreps, p, q, n)
+coverage_experiment(
+  outreps,
+  inreps,
+  p,
+  q,
+  n,
+  ci_method = cca_ci_asymptotic,
+  ...
+)
 }
 \arguments{
 \item{outreps}{Each "outer replication" draws a new value of sigma}
@@ -17,12 +25,23 @@ same value of sigma}
 \item{q}{The dimension of Y}
 
 \item{n}{How many datapoints to draw in each sample}
+
+\item{ci_method}{A method for constructing CCA confidence intervals. Needs
+an API-like cca_ci_asymptotic (the default)}
+
+\item{...}{additional arguments passed on to ci_method}
 }
 \value{
-A big array with all of the results. The array has the following
-dimensions: outreps by inreps by (p + q) by K by 3. The last dimension
-holds the lower CI estimates, upper CI estimates, and true values,
-respectively.
+A list of results, containing: (1) cis, a 5 dimensional array of
+confidence intervals, (2) truth, a 4 dimensional array that holds the true
+values (3) cover, a 4 dimensional array indicating which cis cover the
+truth, and (4) sigma, a list of length outreps that holds the generative
+Sigma. For each of the arrays, the first two dimensions are coordinates (p
+\itemize{
+\item q) and then components (K), and the last two dimensions are inreps and
+then outreps. For cis, the middle dimension holds lower and upper
+confidence bounds, respectively.
+}
 }
 \description{
 Conduct asymptotic coverage experiment
