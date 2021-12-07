@@ -1,16 +1,14 @@
 ## code to support simulation studies of CCA
 
-sim.coverage.check <- function(n, px, py){
-    Sigma <- generate.sigma(px, py)
-    dat <- generate.data(n, Sigma, px)
-    X <- dat$X
-    Y <- dat$Y
+sim.coverage.check <- function(n, px, py) {
+  Sigma <- generate.sigma(px, py)
+  dat <- generate.data(n, Sigma, px)
+  X <- dat$X
+  Y <- dat$Y
 
-    pop.fm <- cancor.cov(Sigma, px)
+  pop.fm <- cancor.cov(Sigma, px)
 
-    boot.cis <- bootstrapcca(X, Y)
-
-}
+  boot.cis <- bootstrapcca(X, Y) }
 ##' @title Conduct asymptotic coverage experiment
 ##' @param outreps Each "outer replication" draws a new value of sigma
 ##' @param inreps Each "inner replication" is a repetition with new data for the
