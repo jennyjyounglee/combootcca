@@ -1,19 +1,5 @@
 ## code to support simulation studies of CCA
 
-generate.sigma <- function(px, py){
-    p <- px + py
-    Sigma <- clusterGeneration::genPositiveDefMat(p)$Sigma
-    return(Sigma)
-}
-
-generate.data <- function(n, Sigma, px){
-    p <- nrow(Sigma)
-    Z <- MASS::mvrnorm(n, mu = rep(0,p), Sigma = Sigma)
-    X <- Z[,1:px]
-    Y <- Z[,(px+1):ncol(Sigma)]
-    return(list(X=X,Y=Y))
-}
-
 sim.coverage.check <- function(n, px, py){
     Sigma <- generate.sigma(px, py)
     dat <- generate.data(n, Sigma, px)
@@ -24,6 +10,47 @@ sim.coverage.check <- function(n, px, py){
 
     boot.cis <- bootstrapcca(X, Y)
 
+}
+##' @title Conduct asymptotic coverage experiment
+##' @param outreps Each "outer replication" draws a new value of sigma
+##' @param inreps Each "inner replication" is a repetition with new data for the
+##'   same value of sigma
+##' @param p The dimension of X
+##' @param q The dimension of Y
+##' @param n How many datapoints to draw in each sample
+##' @return A big array with all of the results. The array has the following
+##'   dimensions: outreps by inreps by (p + q) by K by 3. The last dimension
+##'   holds the lower CI estimates, upper CI estimates, and true values,
+##'   respectively.
+##' @export
+##' @author Dan Kessler
+coverage_experiment <- function(outreps, inreps, p, q, n) {
+  K <- min(p, q)
+  output <- array(NA, c(outreps, inreps, (p + q), K, 3),
+    dimnames = list(
+      outreps = NULL,
+      inreps = NULL,
+      coordinate = NULL,
+      component = NULL,
+      quantity = c("lower", "upper", "truth")
+    )
+  )
+
+  for (i in 1:outreps) {
+    sigma <- gen_sigma(p, q)
+    fm_true <- cancor.cov(sigma, px = p)
+    for (j in 1:inreps) {
+      dat <- gen_data(sigma, p, q, n)
+      output[i, j, 1:p, , 3] <- fm_true$xcoef
+      output[i, j, (p + 1):(p + q), , 3] <- fm_true$ycoef
+      ci_asymptotic <- cca_ci_asymptotic(dat$x, dat$y)
+      output[i, j, 1:p, , 1] <- ci_asymptotic$xcoef[, , 1]
+      output[i, j, 1:p, , 2] <- ci_asymptotic$xcoef[, , 2]
+      output[i, j, (p + 1):(p + q), , 1] <- ci_asymptotic$ycoef[, , 1]
+      output[i, j, (p + 1):(p + q), , 2] <- ci_asymptotic$ycoef[, , 2]
+    }
+  }
+  return(output)
 }
 
 coverage_asymptotic <- function(n, p, q, reps) {
@@ -56,6 +83,16 @@ coverage_asymptotic <- function(n, p, q, reps) {
   return(cover)
 }
 
+gen_data <- function(Sigma, p, q, n) {
+  Sigma_r <- chol(Sigma)
+
+  newdata <- t(t(Sigma_r) %*% matrix(rnorm(n * (p + q)), p + q, n))
+  x <- newdata[, 1:p]
+  y <- newdata[, (p + 1):(p + q)]
+  res <- list(x = x, y = y)
+  return(res)
+}
+
 gen_sigma <- function(p, q) {
   sxx <- diag(p)
   syy <- diag(q)
@@ -63,8 +100,8 @@ gen_sigma <- function(p, q) {
   sxx_sqrt <- expm::sqrtm(sxx)
   syy_sqrt <- expm::sqrtm(syy)
 
-  qx <- pracma::randortho(p)
-  qy <- pracma::randortho(q)
+  qx <- randortho_fixed(p)
+  qy <- randortho_fixed(q)
 
   rho <- sort(runif(min(p, q)), decreasing = TRUE)
   s <- matrix(0, q, p)
