@@ -62,3 +62,14 @@ cancor.cov <- function(Sigma, px, align = cancor_signfix_diag) {
 absmax <- function(x) {
   x[which.max(abs(x))]
 }
+
+## vectorized version of cancor
+cancor_vec <- function(data, p, align = cancor_signfix_diag) {
+  n <- nrow(data)
+  q <- ncol(data) - p
+  x <- data[, 1:p]
+  y <- data[, (p + 1):(p + q)]
+  fm <- align(cancor_scalefix(cancor(x, y), n))
+  theta <- c(fm$xcoef, fm$ycoef)
+  return(theta)
+}
