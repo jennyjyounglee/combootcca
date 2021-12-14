@@ -98,7 +98,7 @@ cca_ci_asymptotic <- function(x, y, level = .95, align = cancor_signfix_diag) {
 ##' @return
 ##' @author Daniel Kessler
 ##' @export
-cca_ci_bootstrap <- function(x, y, level = .05, nboots = 1e3, parametric = FALSE,
+cca_ci_bootstrap <- function(x, y, level = .95, nboots = 1e3, parametric = FALSE,
                              progress = 0) {
   n <- nrow(x)
   p <- ncol(x)
