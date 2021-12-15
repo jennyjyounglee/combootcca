@@ -348,6 +348,7 @@ sim.coverage.check <- function(n, px, py) {
   pop.fm <- cancor.cov(Sigma, px)
 
   boot.cis <- bootstrapcca(X, Y) }
+
 ##' @title Conduct asymptotic coverage experiment
 ##' @param outreps Each "outer replication" draws a new value of sigma
 ##' @param inreps Each "inner replication" is a repetition with new data for the
@@ -355,8 +356,12 @@ sim.coverage.check <- function(n, px, py) {
 ##' @param p The dimension of X
 ##' @param q The dimension of Y
 ##' @param n How many datapoints to draw in each sample
-##' @param ci_method A method for constructing CCA confidence intervals. Needs
-##'   an API-like cca_ci_asymptotic (the default)
+##' @param ci_method A list of methods for constructing CCA confidence
+##'   intervals. Needs an API-like cca_ci_asymptotic (the default)
+##' @param sigma Optional. A list of length outreps containing covariance
+##'   matrices of size p + q. This matrices will be used for each of the outreps
+##'   replications. If not provided, a covariance matrix will be generated for
+##'   you for each of the outreps.
 ##' @param ... additional arguments passed on to ci_method
 ##' @return A list of results, containing: (1) cis, a 5 dimensional array of
 ##'   confidence intervals, (2) truth, a 4 dimensional array that holds the true
@@ -368,7 +373,9 @@ sim.coverage.check <- function(n, px, py) {
 ##'   confidence bounds, respectively.
 ##' @export
 ##' @author Dan Kessler
-coverage_experiment <- function(outreps, inreps, p, q, n) {
+coverage_experiment <- function(outreps, inreps, p, q, n,
+                                ci_method = cca_ci_asymptotic,
+                                sigma, ...) {
   K <- min(p, q)
   coord_names <- c(paste0("X_", 1:p), paste0("Y_", 1:q))
 
