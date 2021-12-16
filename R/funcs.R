@@ -351,84 +351,124 @@ sim.coverage.check <- function(n, px, py) {
 }
 
 ##' @title Conduct asymptotic coverage experiment
-##' @param outreps Each "outer replication" draws a new value of sigma
+##' @param outreps Each "outer replication" draws a new value of sigma. This can
+##'   either be an integer (e.g., 10L), in which case a random covariance matrix
+##'   will be drawn for each out replication, or instead it can be a list whose
+##'   length determines the number of replications, and whose values are
+##'   covariance matrices to use.
 ##' @param inreps Each "inner replication" is a repetition with new data for the
 ##'   same value of sigma
 ##' @param p The dimension of X
 ##' @param q The dimension of Y
 ##' @param n How many datapoints to draw in each sample
-##' @param ci_method A list of methods for constructing CCA confidence
-##'   intervals. Needs an API-like cca_ci_asymptotic (the default)
+##' @param nboots How many bootstrap samples to draw
 ##' @param sigma Optional. A list of length outreps containing covariance
 ##'   matrices of size p + q. This matrices will be used for each of the outreps
 ##'   replications. If not provided, a covariance matrix will be generated for
 ##'   you for each of the outreps.
-##' @param ... additional arguments passed on to ci_method
-##' @return A list of results, containing: (1) cis, a 5 dimensional array of
-##'   confidence intervals, (2) truth, a 4 dimensional array that holds the true
-##'   values (3) cover, a 4 dimensional array indicating which cis cover the
-##'   truth, and (4) sigma, a list of length outreps that holds the generative
-##'   Sigma. For each of the arrays, the first two dimensions are coordinates (p
-##'   + q) and then components (K), and the last two dimensions are inreps and
-##'   then outreps. For cis, the middle dimension holds lower and upper
-##'   confidence bounds, respectively.
+##' @return A list of results, containing: (1) truth, a 4D array of true
+##'   parameter values, (2) cover, a 5D array of logicals indicating which CIs
+##'   cover the truth, (3) length, a 5D array of CI lengths, (4) cis, a 6D array
+##'   of the confidence intervals, and (5) sigma, a list of length outreps the
+##'   holds the generative Sigma. For the arrays, the dimensions (as applicable)
+##'   index (i) coordinates (p+q), (ii) components (K), (iii) inreps, (iv)
+##'   outreps, (v) method, (vi) lower/upper confidence bounds.
 ##' @export
 ##' @author Dan Kessler
-coverage_experiment <- function(outreps, inreps, p, q, n,
-                                ci_method = cca_ci_asymptotic,
-                                sigma, ...) {
+coverage_experiment <- function(outreps = 1L, inreps = 1L, p = 2, q = 2,
+                                n = 1000L, nboots = 1000L) {
   K <- min(p, q)
   coord_names <- c(paste0("X_", 1:p), paste0("Y_", 1:q))
 
-  cis <- array(NA, c((p + q), K, 2, inreps, outreps),
+  methods <- c(
+    "asymptotic",
+    "split-regression",
+    "bootstrap-abs"
+  )
+
+  M <- length(methods) # number of methods
+
+  if (is.integer(outreps)) {
+    sigma <- list()
+    for (i in 1:outreps) {
+      sigma[[i]] <- gen_sigma(p, q)
+    }
+  } else if (is.list(outreps)) {
+    sigma <- outreps
+    outreps <- length(sigma)
+  }
+
+  cis <- array(NA, c((p + q), K, inreps, outreps, M, 2),
     dimnames = list(
       coordinate = coord_names,
       component = 1:K,
-      quantity = c("lower", "upper"),
       inreps = 1:inreps,
-      outreps = 1:outreps
+      outreps = 1:outreps,
+      method = methods,
+      quantity = c("lower", "upper")
     )
   )
+
+  cover <- array(NA, c((p + q), K, inreps, outreps, M),
+    dimnames = list(
+      coordinate = coord_names,
+      component = 1:K,
+      inreps = 1:inreps,
+      outreps = 1:outreps,
+      method = methods)
+  )
+
+  length <- cover
 
   truth <- array(NA, c((p + q), K, inreps, outreps),
     dimnames = list(
       coordinate = coord_names,
       component = 1:K,
       inreps = 1:inreps,
-      outreps = 1:outreps
-    )
+      outreps = 1:outreps)
   )
 
-  sigma <- list()
+
 
   for (i in 1:outreps) {
-    sigma[[i]] <- gen_sigma(p, q)
     fm_true <- cancor.cov(sigma[[i]], px = p)
     for (j in 1:inreps) {
       dat <- gen_data(sigma[[i]], p, q, n)
       truth[1:p, , j, i] <- fm_true$xcoef
       truth[(p + 1):(p + q), , j, i] <- fm_true$ycoef
-      ci_estimates <- ci_method(dat$x, dat$y, ...)
-      cis[1:p, , 1, j, i] <- ci_estimates$xcoef[, , 1]
-      cis[1:p, , 2, j, i] <- ci_estimates$xcoef[, , 2]
-      cis[(p + 1):(p + q), , 1, j, i] <- ci_estimates$ycoef[, , 1]
-      cis[(p + 1):(p + q), , 2, j, i] <- ci_estimates$ycoef[, , 2]
+
+      ## asymptotic
+      ci_estimates <- cca_ci_asymptotic(dat$x, dat$y)
+      cis[1:p, , j, i, 1, 1] <- ci_estimates$xcoef[, , 1]
+      cis[1:p, , j, i, 1, 2] <- ci_estimates$xcoef[, , 2]
+      cis[(p + 1):(p + q), , j, i, 1, 1] <- ci_estimates$ycoef[, , 1]
+      cis[(p + 1):(p + q), , j, i, 1, 2] <- ci_estimates$ycoef[, , 2]
+
+      ## regression
+      ci_estimates <- cca_ci_regression(dat$x, dat$y)
+      cis[1:p, , j, i, 2, 1] <- ci_estimates$xcoef[, , 1]
+      cis[1:p, , j, i, 2, 2] <- ci_estimates$xcoef[, , 2]
+      cis[(p + 1):(p + q), , j, i, 2, 1] <- ci_estimates$ycoef[, , 1]
+      cis[(p + 1):(p + q), , j, i, 2, 2] <- ci_estimates$ycoef[, , 2]
+
+      ## bootstrap-abs
+      ci_estimates <- cca_ci_bootstrap(dat$x, dat$y, nboots = 10)
+      cis[1:p, , j, i, 3, 1] <- ci_estimates$xcoef[, , 1]
+      cis[1:p, , j, i, 3, 2] <- ci_estimates$xcoef[, , 2]
+      cis[(p + 1):(p + q), , j, i, 3, 1] <- ci_estimates$ycoef[, , 1]
+      cis[(p + 1):(p + q), , j, i, 3, 2] <- ci_estimates$ycoef[, , 2]
     }
   }
 
-  cover <- cis[, , 1, , ] <= drop(truth) &
-    drop(truth) <= cis[, , 2, , ]
+  for (m in 1:M) {
+    cover[, , , , m] <- cis[, , , , m, 1] <= drop(truth) &
+      drop(truth) <= cis[, , , , m, 2]
 
-  ## Fix dims and dimnames of cover
-  dim(cover) <- c((p + q), K, inreps, outreps)
-  dimnames(cover) <- list(
-    coordinate = coord_names,
-    component = 1:K,
-    inreps = 1:inreps,
-    outreps = 1:outreps
-  )
+    length[, , , , m] <- cis[, , , , m, 2] - cis[, , , , m, 1]
+  }
 
-  return(list(cis = cis, truth = truth, cover = cover, sigma = sigma))
+  return(list(cis = cis, truth = truth, cover = cover,
+              length = length, sigma = sigma))
 }
 
 
