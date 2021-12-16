@@ -347,7 +347,8 @@ sim.coverage.check <- function(n, px, py) {
 
   pop.fm <- cancor.cov(Sigma, px)
 
-  boot.cis <- bootstrapcca(X, Y) }
+  boot.cis <- bootstrapcca(X, Y)
+}
 
 ##' @title Conduct asymptotic coverage experiment
 ##' @param outreps Each "outer replication" draws a new value of sigma
