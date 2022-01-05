@@ -70,6 +70,7 @@ cancor_signfix_max <- function(fm) {
 ##' @param N The number of observations
 ##' @return A modified version of fm
 ##' @author Daniel Kessler
+##' @export
 cancor_scalefix <- function(fm, N) {
   fm$xcoef <- sqrt(N - 1) * fm$xcoef
   fm$ycoef <- sqrt(N - 1) * fm$ycoef
