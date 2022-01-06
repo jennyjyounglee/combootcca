@@ -606,3 +606,62 @@ cancor_vec <- function(data, p, align = cancor_signfix_diag) {
   theta <- c(fm$xcoef, fm$ycoef)
   return(theta)
 }
+
+## batchtools functions below here
+
+##' This is a convenience function for use with batchtools
+##'
+##' The details go here
+##' @title Batchtools convenience function for "problem"
+##' @param job Constructed by batchtools
+##' @param data Optionally, pass a list with named elements `x` and `y`, where
+##'   each is an n by p and n by q matrix, respectively
+##' @param sigma Optionally, pass a square covariance matrix of dimension (p + q)
+##' @param p The dimension of the random variable X
+##' @param q The dimension of the random variable Y
+##' @param n The number of observations
+##' @param inreps How many replicates to draw
+##' @return An instance
+##' @author Daniel Kessler
+##' @export
+bt_problem_std_fun <- function(job = NULL, data = NULL, sigma = NULL, p = NULL, q = NULL,
+                     n = NULL, inreps = 1L) {
+  prob_fun_inner <- function(data = NULL) {
+    res <- list()
+    if (!is.null(data)) res$data <- data
+    if (is.null(data)) res$data <- ccasleuth:::gen_data(sigma, p, q, n)
+    res$fm_hat <- ccasleuth:::cancor_scalefix(
+      cancor(res$data$x, res$data$y), n
+      )
+    return(res)
+  }
+
+  instance <- list()
+  instance$inreps <- list()
+
+  if (!is.null(data)) instance$inreps[1] <- prob_fun_inner(data = data)
+
+  if (is.null(data)) {
+    if (is.null(sigma)) sigma <- ccasleuth:::gen_sigma(p, q)
+    instance$inreps <- replicate(inreps, prob_fun_inner())
+  }
+
+  instance$sigma <- sigma
+  if (!is.null(sigma)) instance$fm_true <- ccasleuth::cancor.cov(sigma, p)
+
+  return(instance)
+}
+##' .. content for \description{} (no empty lines) ..
+##'
+##' .. content for \details{} ..
+##' @title BT algo fun for Absolute Value Bootstrap
+##' @param job 
+##' @param data 
+##' @param instance 
+##' @return 
+##' @author Daniel Kessler
+bt_algo_bootabs_fun <- function(job = NULL, data = NULL, instance = NULL,
+                                level = .95, nboots = 1e3, parametric = FALSE) {
+  
+
+}
