@@ -665,3 +665,20 @@ bt_algo_bootabs_fun <- function(job = NULL, data = NULL, instance = NULL,
   
 
 }
+
+fm2mat <- function(fm) rbind(fm$xcoef, fm$ycoef)
+
+fm2vec <- function(fm) mat2vec(fm2mat(fm))
+
+mat2fm <- function(mat, p) {
+  fm <- list()
+  fm$xcoef <- mat[1:p, ]
+  fm$ycoef <- mat[(p + 1):nrow(mat), ]
+  return(fm)
+}
+
+mat2vec <- function(mat) c(mat)
+
+vec2fm <- function(vec, p, q) mat2fm(vec2mat(vec, p, q), p)
+
+vec2mat <- function(vec, p, q) matrix(vec, nrow = p + q)
