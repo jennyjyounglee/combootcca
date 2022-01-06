@@ -16,9 +16,10 @@
 ##'
 ##' @title Fix cancor signs based on the diagonal
 ##' @param fm A fitted object returned by cancor (or similar)
+##' @param ref Not used
 ##' @return Object like fm but with possible sign flips
 ##' @author Dan Kessler
-cancor_signfix_diag <- function(fm) {
+cca_align_posdiag <- function(fm, ref) {
   k <- length(fm$cor)
   fm$xcoef <- fm$xcoef[, 1:k]
   fm$ycoef <- fm$ycoef[, 1:k]
@@ -47,7 +48,7 @@ cancor_signfix_diag <- function(fm) {
 ##' @return Same object as returned by cancor after sign-flipping per
 ##'     the identifiability condition discussed in Details.
 ##' @author Daniel Kessler
-cancor_signfix_max <- function(fm) {
+cca_align_posmax <- function(fm) {
   K <- min(ncol(fm$xcoef), ncol(fm$ycoef))
 
   theta <- rbind(fm$xcoef[, 1:K], fm$ycoef[, 1:K])
@@ -121,7 +122,7 @@ cancor_scaled <- function(x, y, xcenter = TRUE, ycenter = TRUE) {
 ##' @return List with two objects: xcoef_ci and ycoef_ci.
 ##' @author Dan Kessler
 ##' @export
-cca_ci_asymptotic <- function(x, y, level = .95, align = cancor_signfix_diag, ref) {
+cca_ci_asymptotic <- function(x, y, level = .95, align = cca_align_posdiag, ref) {
   n <- nrow(x)
   p <- ncol(x)
   q <- ncol(y)
@@ -594,7 +595,7 @@ randortho_fixed <- function(n, type = c("orthonormal", "unitary")) {
 ##' ycoef: estimated coefficients for the y variables
 ##' @author Daniel Kessler
 ##' @export
-cancor.cov <- function(Sigma, px, align = cancor_signfix_diag) {
+cancor.cov <- function(Sigma, px, align = cca_align_posdiag) {
   p <- nrow(Sigma)
   sxx <- Sigma[1:px, 1:px]
   syy <- Sigma[(px + 1):p, (px + 1):p]
@@ -628,7 +629,7 @@ absmax <- function(x) {
 }
 
 ## vectorized version of cancor
-cancor_vec <- function(data, p, align = cancor_signfix_diag) {
+cancor_vec <- function(data, p, align = cca_align_posdiag) {
   n <- nrow(data)
   q <- ncol(data) - p
   x <- data[, 1:p]
