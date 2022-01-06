@@ -1,4 +1,13 @@
-## functions related to aligning CCA solutions
+## Naming conventions used in this file:
+## cca_align_*: functions for aligning cca solutions
+## cca_ci_*: functions that take data and return CI's (after alignment)
+## bt_{prob,algo}_*method*_{inner,fun}: functions for use with batchtools.
+##     prob for problems, algo for algorithms.
+##     *method* names the approach.
+##     fun is for function to be used in prob/algo definition, inner for inrep function
+
+
+
 
 ##' Correct sign ambiguity in canonical correlation analysis by requiring that
 ##' the diagonal of xcoef be non-negative (this is the approach suggested by
@@ -86,18 +95,20 @@ cancor_scalefix <- function(fm, N) {
 ##' @param align A function to perform post-processing on the estimated
 ##'   coefficients to render the solution well-identified. By default, this uses
 ##'   cancor_signfix_diag, which ensures that the diagonal of xcoef is
-##'   non-negative.
+##'   non-negative. Should also take "ref" or "..." as an argument (but doesn't have to use it).
+##' @param ref A reference solution to align against
 ##' @return List with two objects: xcoef_ci and ycoef_ci.
 ##' @author Dan Kessler
 ##' @export
-cca_ci_asymptotic <- function(x, y, level = .95, align = cancor_signfix_diag) {
+cca_ci_asymptotic <- function(x, y, level = .95, align = cancor_signfix_diag, ref) {
   n <- nrow(x)
   p <- ncol(x)
   q <- ncol(y)
   K <- min(p, q)
 
-  fm <- cancor(x, y) # fit the CCA model
-  fm <- align(cancor_scalefix(fm, n))
+  fm <- cancor_scalefix(cancor(x, y), n) # fit the (rescaled) CCA model
+  fm <- align(fm, ref)
+  fm <- align(cancor_scalefix(cancor(x, y), n))
   fm$xcoef <- fm$xcoef[, 1:K]
   fm$ycoef <- fm$ycoef[, 1:K]
 
@@ -658,12 +669,38 @@ bt_problem_std_fun <- function(job = NULL, data = NULL, sigma = NULL, p = NULL, 
 ##' @param job 
 ##' @param data 
 ##' @param instance 
+##' @param level 
+##' @param nboots 
+##' @param parametric 
 ##' @return 
 ##' @author Daniel Kessler
 bt_algo_bootabs_fun <- function(job = NULL, data = NULL, instance = NULL,
                                 level = .95, nboots = 1e3, parametric = FALSE) {
   
 
+}
+
+##' Given a single inrep, do your thing
+##'
+##' .. content for \details{} ..
+##' @title
+##' @param inrep
+##' @return
+##' @author Daniel Kessler
+bt_algo_bootabs_inner <- function(inrep) {
+
+}
+##' .. content for \description{} (no empty lines) ..
+##'
+##' .. content for \details{} ..
+##' @title Batchtools Algorithm: Asymptotic CIs (Inrep Function)
+##' @param inrep A given internal replication of the problem
+##' @param level Value in (0,1), e.g., 0.95 is a 95% CI
+##' @param align A function to use to align. Can make use of inrep$fm_hat
+##' @return A list with two objects: xcoef_ci and ycoef_ci
+##' @author Daniel Kessler
+bt_algo_asympt_inner <- function(inrep, level, align) {
+  cca_ci_asymptotic(inrep$data$x, inrep$data$y, level, align, ref = inrep$fm_hat)
 }
 
 fm2mat <- function(fm) rbind(fm$xcoef, fm$ycoef)
