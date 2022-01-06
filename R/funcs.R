@@ -62,18 +62,6 @@ cancor_signfix_max <- function(fm) {
   return(fm)
 }
 
-##' Adjust canonical correlation analysis results so that canonical
-##' variates have unit variance
-##'
-##' Cancor uses the Golub and Van Loan algorithm, which yields
-##' canonical variates that have unit norm rather than unit variance.
-##' As a result, the canonical variates will have (empirical) variance
-##' of 1/(N-1), where N is the number of observations. This is
-##' undesirable if we wish to perform inference on the weights in
-##' xcoef or ycoef, because their scale will vary with N.
-##'
-##' This function simply multiplies both xcoef and ycoef by sqrt(N-1)
-##' so that the resulting canonical variates will indeed have unit variance.
 ##' @title Fix Cancor Scaling
 ##' @param fm A fitted object returned by cancor
 ##' @param N The number of observations
@@ -85,6 +73,39 @@ cancor_scalefix <- function(fm, N) {
   fm$ycoef <- sqrt(N - 1) * fm$ycoef
   return(fm)
 }
+
+##' Compute the canonical correlations between two data matrices such that
+##' canonical variates have unit variance.
+##'
+##' This is a simple wrapper around stats::cancor. stats::cancor uses the Golub
+##' and Van Loan algorithm, which yields canonical variates that have unit norm
+##' rather than unit variance.
+##' As a result, the canonical variates will have (empirical) variance
+##' of 1/(N-1), where N is the number of observations. This is
+##' undesirable if we wish to perform inference on the weights in
+##' xcoef or ycoef, because their scale will vary with N.
+##'
+##' This function simply calls stats::cancor and then multiplies both xcoef and
+##' ycoef by sqrt(N-1) so that the resulting canonical variates will indeed have
+##' unit variance.
+##'
+##' See the documentation for stats::cancor for more details on standard usage.
+##'
+##' @title Canonical Correlations
+##' @param x
+##' @param y
+##' @param xcenter
+##' @param ycenter
+##' @return
+##' @author Daniel Kessler
+cancor_scaled <- function(x, y, xcenter = TRUE, ycenter = TRUE) {
+  n <- nrow(x)
+  fm <- stats::cancor(x, y, xcenter, ycenter)
+  fm$xcoef <- sqrt(n - 1) * fm$xcoef
+  fm$ycoef <- sqrt(n - 1) * fm$ycoef
+  return(fm)
+}
+
 ##' Obtain confidence intervals for the "directions" of a canonical correlation
 ##' analysis using asymptotic results from Anderson 1999.
 ##'
@@ -106,9 +127,8 @@ cca_ci_asymptotic <- function(x, y, level = .95, align = cancor_signfix_diag, re
   q <- ncol(y)
   K <- min(p, q)
 
-  fm <- cancor_scalefix(cancor(x, y), n) # fit the (rescaled) CCA model
+  fm <- cancor_scaled(x, y)
   fm <- align(fm, ref)
-  fm <- align(cancor_scalefix(cancor(x, y), n))
   fm$xcoef <- fm$xcoef[, 1:K]
   fm$ycoef <- fm$ycoef[, 1:K]
 
@@ -193,7 +213,7 @@ cca_ci_bootstrap <- function(x, y, level = .95, nboots = 1e3, parametric = FALSE
   p <- ncol(x)
   q <- ncol(y)
 
-  fm <- cancor_scalefix(cancor(x, y), n)
+  fm <- cancor_scaled(x, y)
   K <- length(fm$cor)
 
   rho_hat <- fm$cor
@@ -212,7 +232,7 @@ cca_ci_bootstrap <- function(x, y, level = .95, nboots = 1e3, parametric = FALSE
     idx <- sample(n, replace = TRUE)
     if (!parametric) {
       idx <- sample(n, replace = TRUE)
-      fm_boot <- cancor_scalefix(cancor(x[idx, ], y[idx, ]), n)
+      fm_boot <- cancor_scaled(x[idx, ], y[idx, ])
     } else {
       if (i == 1) { # only compute cholesky once
         sigma_hat <- cov(cbind(x, y))
@@ -221,7 +241,7 @@ cca_ci_bootstrap <- function(x, y, level = .95, nboots = 1e3, parametric = FALSE
       newdata <- t(l_hat %*% matrix(rnorm(n * (p + q)), p + q, n))
       x_boot <- newdata[, 1:p]
       y_boot <- newdata[, (p + 1):(p + q)]
-      fm_boot <- cancor_scalefix(cancor(x_boot, y_boot), n)
+      fm_boot <- cancor_scaled(x_boot, y_boot)
     }
     rho_boot[, i] <- fm_boot$cor
     xcoef_boot[, , i] <- fm_boot$xcoef[, 1:K]
@@ -304,7 +324,7 @@ cca_ci_regression <- function(x, y, level = .95, train_ratio = 0.5) {
   y1 <- y[+train_ind, ]
   y2 <- y[-train_ind, ]
 
-  fm1 <- cancor_scalefix(cancor(x1, y1), n_train)
+  fm1 <- cancor_scaled(x1, y1)
   K <- length(fm1$cor)
 
   x2scores <- x2 %*% fm1$xcoef[, 1:K]
@@ -613,7 +633,8 @@ cancor_vec <- function(data, p, align = cancor_signfix_diag) {
   q <- ncol(data) - p
   x <- data[, 1:p]
   y <- data[, (p + 1):(p + q)]
-  fm <- align(cancor_scalefix(cancor(x, y), n))
+  fm <- cancor_scaled(x, y)
+  fm <- align(fm)
   theta <- c(fm$xcoef, fm$ycoef)
   return(theta)
 }
@@ -641,9 +662,7 @@ bt_problem_std_fun <- function(job = NULL, data = NULL, sigma = NULL, p = NULL, 
     res <- list()
     if (!is.null(data)) res$data <- data
     if (is.null(data)) res$data <- ccasleuth:::gen_data(sigma, p, q, n)
-    res$fm_hat <- ccasleuth:::cancor_scalefix(
-      cancor(res$data$x, res$data$y), n
-      )
+    res$fm_hat <- cancor_scaled(res$data$x, res$data$y)
     return(res)
   }
 
