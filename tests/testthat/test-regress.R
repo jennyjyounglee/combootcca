@@ -20,7 +20,7 @@ test_that("CCA and Regression Agree (when appropriately rescaled)", {
   x <- matrix(rnorm(n * p), n, p)
 
   fm_regress <- lm_scalefix(lm(y ~ x))
-  fm_cca <- cancor_scalefix(cancor(x, y), n)
+  fm_cca <- cancor_scaled(x, y)
 
   sign_flip <- sign(fm_cca$xcoef[1, 1]) != sign(coef(fm_regress)[2])
   if (sign_flip) {
