@@ -4,7 +4,7 @@
 \alias{cca_ci_asymptotic}
 \title{Asymptotic confidence intervals for CCA directions}
 \usage{
-cca_ci_asymptotic(x, y, level = 0.95, align = cancor_signfix_diag)
+cca_ci_asymptotic(x, y, level = 0.95, align = cca_align_posdiag, ref)
 }
 \arguments{
 \item{x}{Data matrix of size n by p}
@@ -16,7 +16,10 @@ cca_ci_asymptotic(x, y, level = 0.95, align = cancor_signfix_diag)
 \item{align}{A function to perform post-processing on the estimated
 coefficients to render the solution well-identified. By default, this uses
 cancor_signfix_diag, which ensures that the diagonal of xcoef is
-non-negative.}
+non-negative. Should also take "ref" or "..." as an argument (but doesn't
+have to use it).}
+
+\item{ref}{A reference solution to align against}
 }
 \value{
 List with two objects: xcoef_ci and ycoef_ci.
@@ -24,6 +27,9 @@ List with two objects: xcoef_ci and ycoef_ci.
 \description{
 Obtain confidence intervals for the "directions" of a canonical correlation
 analysis using asymptotic results from Anderson 1999.
+}
+\details{
+Important Note: Theory only valid when p = q.
 }
 \author{
 Dan Kessler

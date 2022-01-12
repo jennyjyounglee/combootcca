@@ -4,7 +4,7 @@
 \alias{cancor.cov}
 \title{Canonical Correlation Analysis for Covariance Matrix}
 \usage{
-cancor.cov(Sigma, px, align = cancor_signfix_diag)
+cancor.cov(Sigma, px, align = cca_align_posdiag)
 }
 \arguments{
 \item{Sigma}{A PSD matrix given the covariance (sample or population)}

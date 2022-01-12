@@ -2,8 +2,7 @@
 
 export(bt_problem_std_fun)
 export(cancor.cov)
-export(cancor_scalefix)
 export(cca_ci_asymptotic)
-export(cca_ci_bootstrap)
+export(cca_ci_bootstrap_abs)
 export(cca_ci_regression)
 export(coverage_experiment)

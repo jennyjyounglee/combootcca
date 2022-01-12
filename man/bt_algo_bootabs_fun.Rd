@@ -19,6 +19,12 @@ bt_algo_bootabs_fun(
 \item{data}{}
 
 \item{instance}{}
+
+\item{level}{}
+
+\item{nboots}{}
+
+\item{parametric}{}
 }
 \value{
 
