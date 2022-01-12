@@ -98,6 +98,7 @@ cancor_scaled <- function(x, y, xcenter = TRUE, ycenter = TRUE) {
 ##' Obtain confidence intervals for the "directions" of a canonical correlation
 ##' analysis using asymptotic results from Anderson 1999.
 ##'
+##' Important Note: Theory only valid when p = q.
 ##' @title Asymptotic confidence intervals for CCA directions
 ##' @param x Data matrix of size n by p
 ##' @param y Data matrix of size n by q
@@ -105,12 +106,14 @@ cancor_scaled <- function(x, y, xcenter = TRUE, ycenter = TRUE) {
 ##' @param align A function to perform post-processing on the estimated
 ##'   coefficients to render the solution well-identified. By default, this uses
 ##'   cancor_signfix_diag, which ensures that the diagonal of xcoef is
-##'   non-negative. Should also take "ref" or "..." as an argument (but doesn't have to use it).
+##'   non-negative. Should also take "ref" or "..." as an argument (but doesn't
+##'   have to use it).
 ##' @param ref A reference solution to align against
 ##' @return List with two objects: xcoef_ci and ycoef_ci.
 ##' @author Dan Kessler
 ##' @export
-cca_ci_asymptotic <- function(x, y, level = .95, align = cca_align_posdiag, ref) {
+cca_ci_asymptotic <- function(x, y, level = .95,
+                              align = cca_align_posdiag, ref) {
   n <- nrow(x)
   p <- ncol(x)
   q <- ncol(y)
@@ -181,7 +184,7 @@ cca_ci_asymptotic <- function(x, y, level = .95, align = cca_align_posdiag, ref)
   return(res)
 }
 
-##' Bootstrap data to generate CCA confidence intervals
+##' Bootstrap absolute quantiles to generate CCA confidence intervals
 ##'
 ##' @title Bootstrap-based confidence intervals for CCA directions
 ##' @param x Data matrix of size N by p
@@ -193,11 +196,11 @@ cca_ci_asymptotic <- function(x, y, level = .95, align = cca_align_posdiag, ref)
 ##'   multivariate normal distribution following sample covariance
 ##' @param progress If 0 (default), don't report progress. If set to a positive
 ##'   integer k, report bootstrap progress every k'th run.
-##' @return
+##' @return List with two objects: xcoef_ci and ycoef_ci.
 ##' @author Daniel Kessler
 ##' @export
-cca_ci_bootstrap <- function(x, y, level = .95, nboots = 1e3, parametric = FALSE,
-                             progress = 0) {
+cca_ci_bootstrap_abs <- function(x, y, level = .95, align, ref,
+                             nboots = 1e3, parametric = FALSE, progress = 0) {
   n <- nrow(x)
   p <- ncol(x)
   q <- ncol(y)
@@ -272,6 +275,39 @@ cca_ci_bootstrap <- function(x, y, level = .95, nboots = 1e3, parametric = FALSE
   return(res)
 }
 
+cca_ci_bootstrap_boot <- function(x, y, level, align, ref,
+                                  nboots = 1e3) {
+
+  data <- cbind(data$x, data$y)
+
+  thing <- ccasleuth:::cancor_vec(data, p = p)
+
+  boot.stat <- function(data, idx, p) {
+    bdata <- data[idx, ]
+    theta <- ccasleuth:::cancor_vec(bdata, p = p)
+    return(theta)
+  }
+
+  boot.out <- boot::boot(data,
+    statistic = boot.stat,
+    R = 1000, p = p
+  )
+
+  boot::boot.ci(boot.out, index = 1)
+  c(truth$xcoef, truth$ycoef)[1]
+
+  boot::boot.ci(boot.out, index = 2)
+  c(truth$xcoef, truth$ycoef)[2]
+
+  boot::boot.ci(boot.out, index = 3)
+  c(truth$xcoef, truth$ycoef)[3]
+
+  boot::boot.ci(boot.out, index = 4)
+  c(truth$xcoef, truth$ycoef)[4]
+
+  boot_out <- boot::boot(data, statistic = boot.stat)
+}
+
 ##' Obtain confidence intervals for canonical correlation analysis directions by
 ##' taking a regression-approach
 ##'
@@ -300,7 +336,7 @@ cca_ci_bootstrap <- function(x, y, level = .95, nboots = 1e3, parametric = FALSE
 ##' @return List with two objects: xcoef_ci and ycoef_ci.
 ##' @author Dan Kessler
 ##' @export
-cca_ci_regression <- function(x, y, level = .95, train_ratio = 0.5) {
+cca_ci_regression <- function(x, y, level = .95, align, ref, train_ratio = 0.5) {
   n <- nrow(x)
   p <- ncol(x)
   q <- ncol(y)
@@ -616,7 +652,7 @@ absmax <- function(x) {
   x[which.max(abs(x))]
 }
 
-## vectorized version of cancor
+## vectorized version of cancor for use with boot
 cancor_vec <- function(data, p, align = cca_align_posdiag) {
   n <- nrow(data)
   q <- ncol(data) - p
