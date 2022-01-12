@@ -653,13 +653,13 @@ absmax <- function(x) {
 }
 
 ## vectorized version of cancor for use with boot
-cancor_vec <- function(data, p, align = cca_align_posdiag) {
+cancor_vec <- function(data, p, align = cca_align_posdiag, ref) {
   n <- nrow(data)
   q <- ncol(data) - p
   x <- data[, 1:p]
   y <- data[, (p + 1):(p + q)]
   fm <- cancor_scaled(x, y)
-  fm <- align(fm)
+  fm <- align(fm, ref)
   theta <- c(fm$xcoef, fm$ycoef)
   return(theta)
 }
