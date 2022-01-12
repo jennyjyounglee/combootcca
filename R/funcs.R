@@ -734,6 +734,87 @@ bt_algo_bootabs_fun <- function(job = NULL, data = NULL, instance = NULL,
 bt_algo_bootabs_inner <- function(inrep) {
 
 }
+
+
+bt_algo_boot_inner <- function(inrep, nboots, align, ref, level) {
+
+  n <- nrow(inrep$data$x)
+  p <- ncol(inrep$data$x)
+  q <- ncol(inrep$data$y)
+  k <- min(p, q, n)
+
+  data_flat <- cbind(inrep$data$x, inrep$data$y)
+
+  boot_stat <- function(data, idx, ...) {
+    bdata <- data[idx, ]
+    theta <- cancor_vec(bdata, ...)
+    return(theta)
+  }
+
+  boot_out <- boot::boot(data_flat,
+    R = nboots, # TODO softcode this
+    statistic = boot_stat,
+    p = p,
+    align = align,
+    ref = ref
+    )
+
+  ## preallocate for results
+  numel <- (p + q) * k
+  ci_norm_flat <- array(NA, c(numel, 2))
+  ci_basic_flat <- array(NA, c(numel, 2))
+  ci_perc_flat <- array(NA, c(numel, 2))
+  ci_bca_flat <- array(NA, c(numel, 2))
+
+
+  ## loop over theta to get confidence intervals
+  for (i in seq_len(numel)) {
+    bootci <- boot::boot.ci(
+      boot.out = boot_out,
+      conf = level,
+      type = c("norm", "basic", "perc", "bca"),
+      index = i
+      )
+
+    ci_norm_flat[i, ] <- bootci$normal[1, 2:3]
+    ci_basic_flat[i, ] <- bootci$basic[1, 4:5]
+    ci_perc_flat[i, ] <- bootci$percent[1, 4:5]
+    ci_bca_flat[i, ] <- bootci$bca[1, 4:5]
+
+  }
+
+  ci_glue <- function(ci_flat) {
+    alpha <- 1 - level
+    ci_levels <- paste0(c(100 * alpha / 2, 100 * (1 - alpha / 2)), "%")
+    adimnames <- list(
+      coordinate = NULL,
+      component = 1:k,
+      ci_levels
+    )
+
+    ci_lower <- vec2fm(ci_flat[, 1], p, q)
+    ci_upper <- vec2fm(ci_flat[, 2], p, q)
+
+    xcoef_ci <- abind::abind(ci_lower$xcoef, ci_upper$xcoef, along = 3)
+    dimnames(xcoef_ci) <- adimnames
+
+    ycoef_ci <- abind::abind(ci_lower$ycoef, ci_upper$ycoef, along = 3)
+    dimnames(ycoef_ci) <- adimnames
+
+    fm <- list(xcoef_ci = xcoef_ci, ycoef_ci = ycoef_ci)
+    return(fm)
+  }
+
+  res <- list(
+    ci_norm = ci_glue(ci_norm_flat),
+    ci_basic = ci_glue(ci_basic_flat),
+    ci_perc = ci_glue(ci_perc_flat),
+    ci_bca = ci_glue(ci_bca_flat)
+  )
+
+  return(res)
+}
+
 ##' .. content for \description{} (no empty lines) ..
 ##'
 ##' .. content for \details{} ..
