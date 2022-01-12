@@ -698,7 +698,7 @@ bt_problem_std_fun <- function(job = NULL, data = NULL, sigma = NULL, p = NULL, 
 
   if (is.null(data)) {
     if (is.null(sigma)) sigma <- ccasleuth:::gen_sigma(p, q)
-    instance$inreps <- replicate(inreps, prob_fun_inner())
+    instance$inreps <- replicate(inreps, prob_fun_inner(), simplify = FALSE)
   }
 
   instance$sigma <- sigma
