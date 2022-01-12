@@ -16,7 +16,9 @@ test_that("Inner BOOT Function Works", {
 
  problem <- bt_problem_std_fun(p = 2, q = 3, n = 1000, inreps = 3L)
 
- out <- bt_algo_boot_inner(problem$inreps[[1]], 1000, align = cca_align_posdiag,
-                           level = .95)
+ expect_error(bt_algo_boot_inner(problem$inreps[[1]], 1000,
+   align = cca_align_posdiag,
+   level = .90
+ ), NA)
 
 })
