@@ -369,7 +369,7 @@ sim.coverage.check <- function(n, px, py) {
   X <- dat$X
   Y <- dat$Y
 
-  pop.fm <- cancor.cov(Sigma, px)
+  pop.fm <- cancor_cov(Sigma, px)
 
   boot.cis <- bootstrapcca(X, Y)
 }
@@ -455,7 +455,7 @@ coverage_experiment <- function(outreps = 1L, inreps = 1L, p = 2, q = 2,
 
 
   for (i in 1:outreps) {
-    fm_true <- cancor.cov(sigma[[i]], px = p)
+    fm_true <- cancor_cov(sigma[[i]], px = p)
     for (j in 1:inreps) {
       dat <- gen_data(sigma[[i]], p, q, n)
       truth[1:p, , j, i] <- fm_true$xcoef
@@ -586,7 +586,7 @@ randortho_fixed <- function(n, type = c("orthonormal", "unitary")) {
 ##' ycoef: estimated coefficients for the y variables
 ##' @author Daniel Kessler
 ##' @export
-cancor.cov <- function(Sigma, px, align = cca_align_posdiag) {
+cancor_cov <- function(Sigma, px, align = cca_align_posdiag) {
   p <- nrow(Sigma)
   sxx <- Sigma[1:px, 1:px]
   syy <- Sigma[(px + 1):p, (px + 1):p]
