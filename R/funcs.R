@@ -80,11 +80,11 @@ cca_align_posmax <- function(fm) {
 ##'
 ##' See the documentation for stats::cancor for more details on standard usage.
 ##'
-##' @title Canonical Correlations
-##' @param x
-##' @param y
-##' @param xcenter
-##' @param ycenter
+##' @title Canonical Correlations with Unit Variance
+##' @param x one dataset
+##' @param y the other dataset
+##' @param xcenter whether to center x
+##' @param ycenter whether to center y
 ##' @return
 ##' @author Daniel Kessler
 cancor_scaled <- function(x, y, xcenter = TRUE, ycenter = TRUE) {
