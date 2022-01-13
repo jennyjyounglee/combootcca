@@ -554,8 +554,6 @@ randortho_fixed <- function(n, type = c("orthonormal", "unitary")) {
     ph <- d / abs(d)
     q %*% diag(ph)
 }
-## utility functions common to multiple routines
-
 
 ##' Compute the Canonical Correlation Analysis solution based on a
 ##' covariance matrix
@@ -754,9 +752,8 @@ bt_algo_boot_inner <- function(inrep, nboots, align, ref, level) {
   return(res)
 }
 
-##' .. content for \description{} (no empty lines) ..
+##' Construct Asymptotic CIs using batchtools
 ##'
-##' .. content for \details{} ..
 ##' @title Batchtools Algorithm: Asymptotic CIs (Inrep Function)
 ##' @param inrep A given internal replication of the problem
 ##' @param level Value in (0,1), e.g., 0.95 is a 95% CI
