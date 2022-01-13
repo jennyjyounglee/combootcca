@@ -17,10 +17,7 @@ bt_algo_asympt_inner(inrep, level, align)
 A list with two objects: xcoef_ci and ycoef_ci
 }
 \description{
-.. content for \description{} (no empty lines) ..
-}
-\details{
-.. content for \details{} ..
+Construct Asymptotic CIs using batchtools
 }
 \author{
 Daniel Kessler

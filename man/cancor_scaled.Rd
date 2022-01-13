@@ -2,9 +2,18 @@
 % Please edit documentation in R/funcs.R
 \name{cancor_scaled}
 \alias{cancor_scaled}
-\title{Canonical Correlations}
+\title{Canonical Correlations with Unit Variance}
 \usage{
 cancor_scaled(x, y, xcenter = TRUE, ycenter = TRUE)
+}
+\arguments{
+\item{x}{one dataset}
+
+\item{y}{the other dataset}
+
+\item{xcenter}{whether to center x}
+
+\item{ycenter}{whether to center y}
 }
 \value{
 
