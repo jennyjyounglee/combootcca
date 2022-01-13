@@ -275,39 +275,6 @@ cca_ci_bootstrap_abs <- function(x, y, level = .95, align, ref,
   return(res)
 }
 
-cca_ci_bootstrap_boot <- function(x, y, level, align, ref,
-                                  nboots = 1e3) {
-
-  data <- cbind(data$x, data$y)
-
-  thing <- ccasleuth:::cancor_vec(data, p = p)
-
-  boot.stat <- function(data, idx, p) {
-    bdata <- data[idx, ]
-    theta <- ccasleuth:::cancor_vec(bdata, p = p)
-    return(theta)
-  }
-
-  boot.out <- boot::boot(data,
-    statistic = boot.stat,
-    R = 1000, p = p
-  )
-
-  boot::boot.ci(boot.out, index = 1)
-  c(truth$xcoef, truth$ycoef)[1]
-
-  boot::boot.ci(boot.out, index = 2)
-  c(truth$xcoef, truth$ycoef)[2]
-
-  boot::boot.ci(boot.out, index = 3)
-  c(truth$xcoef, truth$ycoef)[3]
-
-  boot::boot.ci(boot.out, index = 4)
-  c(truth$xcoef, truth$ycoef)[4]
-
-  boot_out <- boot::boot(data, statistic = boot.stat)
-}
-
 ##' Obtain confidence intervals for canonical correlation analysis directions by
 ##' taking a regression-approach
 ##'
