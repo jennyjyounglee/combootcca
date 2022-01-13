@@ -706,34 +706,6 @@ bt_problem_std_fun <- function(job = NULL, data = NULL, sigma = NULL, p = NULL, 
 
   return(instance)
 }
-##' .. content for \description{} (no empty lines) ..
-##'
-##' .. content for \details{} ..
-##' @title BT algo fun for Absolute Value Bootstrap
-##' @param job 
-##' @param data 
-##' @param instance 
-##' @param level 
-##' @param nboots 
-##' @param parametric 
-##' @return 
-##' @author Daniel Kessler
-bt_algo_bootabs_fun <- function(job = NULL, data = NULL, instance = NULL,
-                                level = .95, nboots = 1e3, parametric = FALSE) {
-  
-
-}
-
-##' Given a single inrep, do your thing
-##'
-##' .. content for \details{} ..
-##' @title
-##' @param inrep
-##' @return
-##' @author Daniel Kessler
-bt_algo_bootabs_inner <- function(inrep) {
-
-}
 
 
 bt_algo_boot_inner <- function(inrep, nboots, align, ref, level) {
