@@ -717,7 +717,7 @@ cancor_vec <- function(data, p, align, ref) {
   y <- data[, (p + 1):(p + q)]
   fm <- cancor_scaled(x, y)
   fm <- align(fm, ref)
-  theta <- c(fm$xcoef, fm$ycoef)
+  theta <- fm2vec(fm)
   return(theta)
 }
 
