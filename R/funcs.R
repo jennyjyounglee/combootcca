@@ -206,6 +206,7 @@ cca_ci_absboot <- function(x, y, level = .95, align = cca_align_posdiag, ref,
   q <- ncol(y)
 
   fm <- cancor_scaled(x, y)
+  fm <- align(fm, ref)
   K <- length(fm$cor)
 
   rho_hat <- fm$cor
@@ -303,7 +304,8 @@ cca_ci_absboot <- function(x, y, level = .95, align = cca_align_posdiag, ref,
 ##' @return List with two objects: xcoef_ci and ycoef_ci.
 ##' @author Dan Kessler
 ##' @export
-cca_ci_regression <- function(x, y, level = .95, align, ref, train_ratio = 0.5) {
+cca_ci_regression <- function(x, y, level = .95, align = cca_align_posdiag, ref,
+                              train_ratio = 0.5) {
   n <- nrow(x)
   p <- ncol(x)
   q <- ncol(y)
@@ -317,6 +319,7 @@ cca_ci_regression <- function(x, y, level = .95, align, ref, train_ratio = 0.5) 
   y2 <- y[-train_ind, ]
 
   fm1 <- cancor_scaled(x1, y1)
+  fm1 <- align(fm1, ref)
   K <- length(fm1$cor)
 
   x2scores <- x2 %*% fm1$xcoef[, 1:K]
@@ -708,8 +711,7 @@ absmax <- function(x) {
 }
 
 ## vectorized version of cancor for use with boot
-cancor_vec <- function(data, p, align = cca_align_posdiag, ref) {
-  n <- nrow(data)
+cancor_vec <- function(data, p, align, ref) {
   q <- ncol(data) - p
   x <- data[, 1:p]
   y <- data[, (p + 1):(p + q)]
