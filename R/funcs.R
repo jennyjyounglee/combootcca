@@ -199,7 +199,7 @@ cca_ci_asymptotic <- function(x, y, level = .95,
 ##' @return List with two objects: xcoef_ci and ycoef_ci.
 ##' @author Daniel Kessler
 ##' @export
-cca_ci_bootstrap_abs <- function(x, y, level = .95, align, ref,
+cca_ci_absboot <- function(x, y, level = .95, align = cca_align_posdiag, ref,
                              nboots = 1e3, parametric = FALSE, progress = 0) {
   n <- nrow(x)
   p <- ncol(x)

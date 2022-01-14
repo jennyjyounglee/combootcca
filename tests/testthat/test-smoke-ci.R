@@ -8,8 +8,8 @@ test_that("All methods for CCA confidence intervals run without errors", {
 
   expect_error(cca_ci_asymptotic(x, y), NA)
   expect_error(cca_ci_regression(x, y), NA)
-  expect_error(cca_ci_bootstrap_abs(x, y, parametric = FALSE), NA)
-  expect_error(cca_ci_bootstrap_abs(x, y, parametric = TRUE), NA)
+  expect_error(cca_ci_absboot(x, y, parametric = FALSE), NA)
+  expect_error(cca_ci_absboot(x, y, parametric = TRUE), NA)
 })
 
 test_that("Inner BOOT Function Works", {
