@@ -730,7 +730,7 @@ cancor_vec <- function(data, p, align, ref) {
 ##' @param job Constructed by batchtools
 ##' @param data Optionally, pass a list with named elements `x` and `y`, where
 ##'   each is an n by p and n by q matrix, respectively
-##' @param sigma Optionally, pass a square covariance matrix of dimension (p + q)
+##' @param sigma Optional: a square covariance matrix of dimension (p + q)
 ##' @param p The dimension of the random variable X
 ##' @param q The dimension of the random variable Y
 ##' @param n The number of observations
