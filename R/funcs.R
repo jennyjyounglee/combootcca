@@ -708,8 +708,9 @@ randortho_fixed <- function(n, type = c("orthonormal", "unitary")) {
 ##' @param px The number of variables in the x dataset
 ##' @param align A function to perform post-processing on the estimated
 ##'   coefficients to render the solution well-identified. By default, this uses
-##'   cancor_signfix_diag, which ensures that the diagonal of xcoef is
+##'   cca_align_posdiag, which ensures that the diagonal of xcoef is
 ##'   non-negative.
+##' @param ref Passed through to alignment
 ##' @return A list containing the following components:
 ##'
 ##' cor: correlations
@@ -719,7 +720,7 @@ randortho_fixed <- function(n, type = c("orthonormal", "unitary")) {
 ##' ycoef: estimated coefficients for the y variables
 ##' @author Daniel Kessler
 ##' @export
-cancor_cov <- function(Sigma, px, align = cca_align_posdiag) {
+cancor_cov <- function(Sigma, px, align = cca_align_posdiag, ref) {
   p <- nrow(Sigma)
   sxx <- Sigma[1:px, 1:px]
   syy <- Sigma[(px + 1):p, (px + 1):p]
@@ -736,7 +737,7 @@ cancor_cov <- function(Sigma, px, align = cca_align_posdiag) {
 
   svd(Sigma)
   fm <- list(cor = rho, xcoef = xcoef, ycoef = ycoef)
-  fm <- align(fm)
+  fm <- align(fm, ref)
   return(fm)
 }
 
