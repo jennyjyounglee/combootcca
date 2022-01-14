@@ -349,6 +349,96 @@ cca_ci_regression <- function(x, y, level = .95, align, ref, train_ratio = 0.5) 
   return(res)
 }
 
+##' Use the boot package to get bootstrapped confidence intervals for CCA
+##'
+##' Details go here
+##' @title Bootstrap-based confidence intervals for CCA
+##' @param x Data matrix of size n by p
+##' @param y Data matrix of size n by q
+##' @param level Level for confidence intervals, should be in (0, 1)
+##' @param align Function for alignment
+##' @param ref Passed through to align function
+##' @param nboots How many bootstrap replicates
+##' @return List of several types of CIs
+##' @author Dan Kessler
+cca_ci_boot <- function(x, y, level=0.90, align = cca_align_posdiag,
+                        ref, nboots = 1e2) {
+  n <- nrow(x)
+  p <- ncol(x)
+  q <- ncol(y)
+  k <- min(p, q, n)
+
+  data_flat <- cbind(x, y)
+
+  boot_stat <- function(data, idx, p, align, ref) {
+    bdata <- data[idx, ]
+    theta <- cancor_vec(bdata, p, align, ref)
+    return(theta)
+  }
+
+  boot_out <- boot::boot(data_flat,
+    R = nboots,
+    statistic = boot_stat,
+    p = p,
+    align = align,
+    ref = ref
+  )
+
+  ## preallocate for results
+  numel <- (p + q) * k
+  ci_norm_flat <- array(NA, c(numel, 2))
+  ci_basic_flat <- array(NA, c(numel, 2))
+  ci_perc_flat <- array(NA, c(numel, 2))
+  ci_bca_flat <- array(NA, c(numel, 2))
+
+
+  ## loop over theta to get confidence intervals
+  for (i in seq_len(numel)) {
+    bootci <- boot::boot.ci(
+      boot.out = boot_out,
+      conf = level,
+      type = c("norm", "basic", "perc", "bca"),
+      index = i
+    )
+
+    ci_norm_flat[i, ] <- bootci$normal[1, 2:3]
+    ci_basic_flat[i, ] <- bootci$basic[1, 4:5]
+    ci_perc_flat[i, ] <- bootci$percent[1, 4:5]
+    ci_bca_flat[i, ] <- bootci$bca[1, 4:5]
+  }
+
+  ci_glue <- function(ci_flat) {
+    alpha <- 1 - level
+    ci_levels <- paste0(c(100 * alpha / 2, 100 * (1 - alpha / 2)), "%")
+    adimnames <- list(
+      coordinate = NULL,
+      component = 1:k,
+      ci_levels
+    )
+
+    ci_lower <- vec2fm(ci_flat[, 1], p, q)
+    ci_upper <- vec2fm(ci_flat[, 2], p, q)
+
+    xcoef_ci <- abind::abind(ci_lower$xcoef, ci_upper$xcoef, along = 3)
+    dimnames(xcoef_ci) <- adimnames
+
+    ycoef_ci <- abind::abind(ci_lower$ycoef, ci_upper$ycoef, along = 3)
+    dimnames(ycoef_ci) <- adimnames
+
+    fm <- list(xcoef_ci = xcoef_ci, ycoef_ci = ycoef_ci)
+    return(fm)
+  }
+
+  res <- list(
+    ci_norm = ci_glue(ci_norm_flat),
+    ci_basic = ci_glue(ci_basic_flat),
+    ci_perc = ci_glue(ci_perc_flat),
+    ci_bca = ci_glue(ci_bca_flat)
+  )
+
+  return(res)
+}
+
 ##' @title Refit a linear model such that predicted values have unit variance
 ##' @param fm An object fitted with lm
 ##' @return An object of type lm refit such that predicted values have unit
@@ -673,80 +763,7 @@ bt_problem_std_fun <- function(job = NULL, data = NULL, sigma = NULL, p = NULL, 
 }
 
 
-bt_algo_boot_inner <- function(inrep, nboots, align, ref, level) {
 
-  n <- nrow(inrep$data$x)
-  p <- ncol(inrep$data$x)
-  q <- ncol(inrep$data$y)
-  k <- min(p, q, n)
-
-  data_flat <- cbind(inrep$data$x, inrep$data$y)
-
-  boot_stat <- function(data, idx, ...) {
-    bdata <- data[idx, ]
-    theta <- cancor_vec(bdata, ...)
-    return(theta)
-  }
-
-  boot_out <- boot::boot(data_flat,
-    R = nboots, # TODO softcode this
-    statistic = boot_stat,
-    p = p,
-    align = align,
-    ref = ref
-    )
-
-  ## preallocate for results
-  numel <- (p + q) * k
-  ci_norm_flat <- array(NA, c(numel, 2))
-  ci_basic_flat <- array(NA, c(numel, 2))
-  ci_perc_flat <- array(NA, c(numel, 2))
-  ci_bca_flat <- array(NA, c(numel, 2))
-
-
-  ## loop over theta to get confidence intervals
-  for (i in seq_len(numel)) {
-    bootci <- boot::boot.ci(
-      boot.out = boot_out,
-      conf = level,
-      type = c("norm", "basic", "perc", "bca"),
-      index = i
-      )
-
-    ci_norm_flat[i, ] <- bootci$normal[1, 2:3]
-    ci_basic_flat[i, ] <- bootci$basic[1, 4:5]
-    ci_perc_flat[i, ] <- bootci$percent[1, 4:5]
-    ci_bca_flat[i, ] <- bootci$bca[1, 4:5]
-
-  }
-
-  ci_glue <- function(ci_flat) {
-    alpha <- 1 - level
-    ci_levels <- paste0(c(100 * alpha / 2, 100 * (1 - alpha / 2)), "%")
-    adimnames <- list(
-      coordinate = NULL,
-      component = 1:k,
-      ci_levels
-    )
-
-    ci_lower <- vec2fm(ci_flat[, 1], p, q)
-    ci_upper <- vec2fm(ci_flat[, 2], p, q)
-
-    xcoef_ci <- abind::abind(ci_lower$xcoef, ci_upper$xcoef, along = 3)
-    dimnames(xcoef_ci) <- adimnames
-
-    ycoef_ci <- abind::abind(ci_lower$ycoef, ci_upper$ycoef, along = 3)
-    dimnames(ycoef_ci) <- adimnames
-
-    fm <- list(xcoef_ci = xcoef_ci, ycoef_ci = ycoef_ci)
-    return(fm)
-  }
-
-  res <- list(
-    ci_norm = ci_glue(ci_norm_flat),
-    ci_basic = ci_glue(ci_basic_flat),
-    ci_perc = ci_glue(ci_perc_flat),
-    ci_bca = ci_glue(ci_bca_flat)
   )
 
   return(res)
