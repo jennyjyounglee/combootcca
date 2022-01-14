@@ -21,9 +21,9 @@
 ##' @author Dan Kessler
 cca_align_posdiag <- function(fm, ref) {
   k <- length(fm$cor)
-  fm$xcoef <- fm$xcoef[, 1:k]
-  fm$ycoef <- fm$ycoef[, 1:k]
-  signs <- diag(sign(diag(fm$xcoef)))
+  fm$xcoef <- fm$xcoef[, 1:k, drop = FALSE]
+  fm$ycoef <- fm$ycoef[, 1:k, drop = FALSE]
+  signs <- diag(x = sign(diag(fm$xcoef)), nrow = k, ncol = k)
   fm$xcoef <- fm$xcoef %*% signs
   fm$ycoef <- fm$ycoef %*% signs
   return(fm)
