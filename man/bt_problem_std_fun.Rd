@@ -20,7 +20,7 @@ bt_problem_std_fun(
 \item{data}{Optionally, pass a list with named elements \code{x} and \code{y}, where
 each is an n by p and n by q matrix, respectively}
 
-\item{sigma}{Optionally, pass a square covariance matrix of dimension (p + q)}
+\item{sigma}{Optional: a square covariance matrix of dimension (p + q)}
 
 \item{p}{The dimension of the random variable X}
 

@@ -4,7 +4,14 @@
 \alias{cca_ci_regression}
 \title{Regression-Based Confidence Intervals for CCA Directions}
 \usage{
-cca_ci_regression(x, y, level = 0.95, align, ref, train_ratio = 0.5)
+cca_ci_regression(
+  x,
+  y,
+  level = 0.95,
+  align = cca_align_posdiag,
+  ref,
+  train_ratio = 0.5
+)
 }
 \arguments{
 \item{x}{Data matrix of size n by p}
