@@ -63,6 +63,31 @@ cca_align_posmax <- function(fm) {
   return(fm)
 }
 
+cca_align_greedy_cosx <- function(fm, ref) {
+  t_hat <- fm$xcoef
+  t_ref <- ref$xcoef
+
+  sim <- cos_sim(t_ref, t_hat)
+
+  ## decompose into signed similarity
+  sim_sign <- sign(sim)
+  sim_abs <- abs(sim)
+
+  k <- ncol(t_ref)
+  map <- rep(0, k)
+  signs <- rep(0, k)
+  for (i in 1:k) {
+    map[i] <- which.max(sim_abs[i, ])
+    signs[i] <- sim_sign[i, map[i]]
+    sim_abs[, map[i]] <- 0 # zero-out the selected column
+  }
+
+  fm$xcoef <- fm$xcoef[, map] %*% diag(signs)
+  fm$ycoef <- fm$ycoef[, map] %*% diag(signs)
+
+  return(fm)
+}
+
 ##' @title Compute cosine similarity between columns of two matrices
 ##' @param x Matrix of size n by p
 ##' @param y Matrix of size n by q
