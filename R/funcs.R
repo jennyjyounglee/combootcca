@@ -759,7 +759,7 @@ bt_problem_std_fun <- function(job = NULL, data = NULL, sigma = NULL, p = NULL,
   }
 
   instance$sigma <- sigma
-  if (!is.null(sigma)) instance$fm_true <- ccasleuth::cancor.cov(sigma, p)
+  if (!is.null(sigma)) instance$fm_true <- cancor_cov(sigma, p)
 
   return(instance)
 }
