@@ -738,8 +738,8 @@ cancor_vec <- function(data, p, align, ref) {
 ##' @return An instance
 ##' @author Daniel Kessler
 ##' @export
-bt_problem_std_fun <- function(job = NULL, data = NULL, sigma = NULL, p = NULL, q = NULL,
-                     n = NULL, inreps = 1L) {
+bt_problem_std_fun <- function(job = NULL, data = NULL, sigma = NULL, p = NULL,
+                               q = NULL, n = NULL, inreps = 1L) {
   prob_fun_inner <- function(data = NULL) {
     res <- list()
     if (!is.null(data)) res$data <- data
