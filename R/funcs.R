@@ -49,16 +49,16 @@ cca_align_posdiag <- function(fm, ref) {
 ##'     the identifiability condition discussed in Details.
 ##' @author Daniel Kessler
 cca_align_posmax <- function(fm) {
-  K <- min(ncol(fm$xcoef), ncol(fm$ycoef))
+  k <- length(fm$cor)
 
-  theta <- rbind(fm$xcoef[, 1:K], fm$ycoef[, 1:K])
+  theta <- rbind(fm$xcoef[, 1:k, drop = FALSE], fm$ycoef[, 1:k, drop = FALSE])
 
   maxes <- apply(theta, 2, absmax)
 
-  flip <- diag(sign(maxes))
+  flip <- diag(x = sign(maxes), nrow = k, ncol = k)
 
-  fm$xcoef[, 1:K] <- fm$xcoef[, 1:K] %*% flip
-  fm$ycoef[, 1:K] <- fm$ycoef[, 1:K] %*% flip
+  fm$xcoef[, 1:k] <- fm$xcoef[, 1:k] %*% flip
+  fm$ycoef[, 1:k] <- fm$ycoef[, 1:k] %*% flip
 
   return(fm)
 }
