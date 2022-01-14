@@ -4,7 +4,7 @@
 \alias{cancor_cov}
 \title{Canonical Correlation Analysis for Covariance Matrix}
 \usage{
-cancor_cov(Sigma, px, align = cca_align_posdiag)
+cancor_cov(Sigma, px, align = cca_align_posdiag, ref)
 }
 \arguments{
 \item{Sigma}{A PSD matrix given the covariance (sample or population)}
@@ -13,8 +13,10 @@ cancor_cov(Sigma, px, align = cca_align_posdiag)
 
 \item{align}{A function to perform post-processing on the estimated
 coefficients to render the solution well-identified. By default, this uses
-cancor_signfix_diag, which ensures that the diagonal of xcoef is
+cca_align_posdiag, which ensures that the diagonal of xcoef is
 non-negative.}
+
+\item{ref}{Passed through to alignment}
 }
 \value{
 A list containing the following components:

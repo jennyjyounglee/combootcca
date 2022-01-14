@@ -4,7 +4,14 @@
 \alias{cancor_scaled}
 \title{Canonical Correlations with Unit Variance}
 \usage{
-cancor_scaled(x, y, xcenter = TRUE, ycenter = TRUE)
+cancor_scaled(
+  x,
+  y,
+  xcenter = TRUE,
+  ycenter = TRUE,
+  align = cca_align_posdiag,
+  ref
+)
 }
 \arguments{
 \item{x}{one dataset}
@@ -14,6 +21,10 @@ cancor_scaled(x, y, xcenter = TRUE, ycenter = TRUE)
 \item{xcenter}{whether to center x}
 
 \item{ycenter}{whether to center y}
+
+\item{align}{A function for aligning the solution}
+
+\item{ref}{Passed through to align}
 }
 \value{
 
