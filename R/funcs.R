@@ -764,24 +764,90 @@ bt_problem_std_fun <- function(job = NULL, data = NULL, sigma = NULL, p = NULL,
   return(instance)
 }
 
-
-
+##' @title Generic inrep function for batchtools algorithms
+##' @param inrep The inrep object
+##' @param ci_func A function that follows the cca_ci_* API
+##' @param ... Arguments passed on to ci_func
+##' @return CIs as returned by ci_func
+##' @author Dan Kessler
+bt_algo_inrep <- function(inrep, ci_func, ...) {
+  res <- ci_func(
+    x = inrep$data$x,
+    y = inrep$data$y,
+    ref = inrep$fm_hat,
+    ...
   )
-
   return(res)
 }
 
-##' Construct Asymptotic CIs using batchtools
-##'
-##' @title Batchtools Algorithm: Asymptotic CIs (Inrep Function)
-##' @param inrep A given internal replication of the problem
-##' @param level Value in (0,1), e.g., 0.95 is a 95% CI
-##' @param align A function to use to align. Can make use of inrep$fm_hat
-##' @return A list with two objects: xcoef_ci and ycoef_ci
-##' @author Daniel Kessler
-bt_algo_asympt_inner <- function(inrep, level, align) {
-  cca_ci_asymptotic(inrep$data$x, inrep$data$y, level, align, ref = inrep$fm_hat)
+##' @title Batchtools Function for Asymptotic Confidence Intervals
+##' @param job required by batchtools
+##' @param data required by batchtools
+##' @param instance required by batchtools
+##' @param ... Arguments passed on to ci_func
+##' @return CI object
+##' @export
+##' @author Dan Kessler
+bt_algo_asymptotic <- function(job, data, instance, ...) {
+  res <- lapply(instance$inreps, bt_algo_inrep,
+    ci_func = cca_ci_asymptotic,
+    align = cca_align_posdiag,
+    ...
+  )
+  return(res)
 }
+
+##' @title Batchtools Function for Bootstrapped Abs
+##' @param job required by batchtools
+##' @param data required by batchtools
+##' @param instance required by batchtools
+##' @param ... Arguments passed on to ci_func
+##' @return CI object
+##' @export
+##' @author Dan Kessler
+bt_algo_absboot <- function(job, data, instance, ...) {
+  res <- lapply(instance$inreps, bt_algo_inrep,
+    ci_func = cca_ci_absboot,
+    align = cca_align_posdiag,
+    ...
+  )
+  return(res)
+}
+
+##' @title Batchtools Function for Regression-Based CIs
+##' @param job required by batchtools
+##' @param data required by batchtools
+##' @param instance required by batchtools
+##' @param ... Arguments passed on to ci_func
+##' @return CI object
+##' @export
+##' @author Dan Kessler
+bt_algo_regression <- function(job, data, instance, ...) {
+  res <- lapply(instance$inreps, bt_algo_inrep,
+    ci_func = cca_ci_regression,
+    align = cca_align_posdiag,
+    ...
+  )
+  return(res)
+}
+
+##' @title Batchtools Function for Bootstrapped Confidence Intervals
+##' @param job required by batchtools
+##' @param data required by batchtools
+##' @param instance required by batchtools
+##' @param ... Arguments passed on to ci_func
+##' @return CI object
+##' @export
+##' @author Dan Kessler
+bt_algo_boot <- function(job, data, instance, ...) {
+  res <- lapply(instance$inreps, bt_algo_inrep,
+    ci_func = cca_ci_boot,
+    align = cca_align_posdiag,
+    ...
+  )
+  return(res)
+}
+
 
 fm2mat <- function(fm) rbind(fm$xcoef, fm$ycoef)
 
