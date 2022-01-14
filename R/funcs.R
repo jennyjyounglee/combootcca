@@ -63,6 +63,19 @@ cca_align_posmax <- function(fm) {
   return(fm)
 }
 
+##' @title Compute cosine similarity between columns of two matrices
+##' @param x Matrix of size n by p
+##' @param y Matrix of size n by q
+##' @return Matrix of size p by q of cosine similarities. The (i, j) entry has
+##'   the similarity between x_i and y_j.
+##' @author Daniel Kessler
+cos_sim <- function(x, y) {
+  x <- scale(x, center = FALSE, scale = sqrt(colSums(x^2)))
+  y <- scale(y, center = FALSE, scale = sqrt(colSums(y^2)))
+
+  return(t(x) %*% y)
+}
+
 ##' Compute the canonical correlations between two data matrices such that
 ##' canonical variates have unit variance.
 ##'
