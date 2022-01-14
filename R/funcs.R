@@ -123,13 +123,17 @@ cos_sim <- function(x, y) {
 ##' @param y the other dataset
 ##' @param xcenter whether to center x
 ##' @param ycenter whether to center y
+##' @param align A function for aligning the solution
+##' @param ref Passed through to align
 ##' @return
 ##' @author Daniel Kessler
-cancor_scaled <- function(x, y, xcenter = TRUE, ycenter = TRUE) {
+cancor_scaled <- function(x, y, xcenter = TRUE, ycenter = TRUE,
+                          align = cca_align_posdiag, ref) {
   n <- nrow(x)
   fm <- stats::cancor(x, y, xcenter, ycenter)
   fm$xcoef <- sqrt(n - 1) * fm$xcoef
   fm$ycoef <- sqrt(n - 1) * fm$ycoef
+  fm <- align(fm, ref)
   return(fm)
 }
 
