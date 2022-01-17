@@ -908,6 +908,17 @@ mat2vec <- function(mat) c(mat)
 vec2fm <- function(vec, p, q) mat2fm(vec2mat(vec, p, q), p)
 
 vec2mat <- function(vec, p, q) matrix(vec, nrow = p + q)
+##' @title Compute CI coverage for a vector
+##' @param true A vector of length p
+##' @param cis A matrix of size p x 2; first column is lower bound of CI, second
+##'   column is upper bound of CI
+##' @return A scalar in [0, 1] with the proportion of covered intervals
+##' @author Dan Kessler
+cca_ci_coverage1 <- function(true, cis) {
+  res <- mean(cis[, 1] <= true & true <= cis[, 2])
+  return(res)
+}
+
 ##' Solve a more generalized version of the Hungarian Algorithm.
 ##'
 ##' The classic Hungarian Algorithm solves P = argmin_P trace(C * P), where P is
