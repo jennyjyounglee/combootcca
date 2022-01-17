@@ -15,3 +15,23 @@ test_that("Greedy Cosine Similarity Alignment Works", {
 
   expect_equal(cca_align_greedy_cosx(fm, ref), fm_aligned)
 })
+
+
+test_that("Generalized Hungarian Algorithm Works: Square", {
+  C <- diag(c(-10, 5, 1))
+  P <- diag(c(-1, 1, 1))
+
+  expect_equal(hungarian_max_signflip(C), P)
+
+  C <- matrix(c(0, 5, 0, -10, 0, 0, 0, 0, 1), 3, 3)
+  P <- matrix(c(0, -1, 0, 1, 0, 0, 0, 0, 1), 3, 3)
+
+  expect_equal(hungarian_max_signflip(C), P)
+})
+
+test_that("Generalized Hungarian Algorithm Works: Wide", {
+  C <- matrix(c(0, 5, -10, 0, 0, 0), 2, 3)
+  P <- matrix(c(0, -1, 0, 1, 0, 0, 0, 0, 0), 3, 3)
+
+  expect_equal(hungarian_max_signflip(C), P)
+})

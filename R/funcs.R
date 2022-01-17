@@ -908,3 +908,36 @@ mat2vec <- function(mat) c(mat)
 vec2fm <- function(vec, p, q) mat2fm(vec2mat(vec, p, q), p)
 
 vec2mat <- function(vec, p, q) matrix(vec, nrow = p + q)
+##' Solve a more generalized version of the Hungarian Algorithm.
+##'
+##' The classic Hungarian Algorithm solves P = argmin_P trace(C * P), where P is
+##' constrained to be a permutation matrix. Here, we instead solve T = argmax_T
+##' trace(C * T), where T is the composition of a column-permutation matrix and
+##' a column-wise sign-flipping matrix. Note that this differs from the classic
+##' Hungarian algorithm in that we (1) maximize the utility of the assignments,
+##' (2) are allowed to flip the sign of any of our utility values.
+##' @title Solve the Hungarian Algorithm (maximizing assignment) but with Sign
+##'   Flipping Allowed
+##' @param C k1 x k2 matrix of assignment costs.
+##' @return Square matrix with k2^2 elements; composition of permutation and
+##'   sign flipping matrix.
+##' @author Dan Kessler
+hungarian_max_signflip <- function(C) {
+  k1 <- nrow(C)
+  k2 <- ncol(C)
+  if (k1 > k2) stop("Algorithm ill-defined for tall C matrix")
+
+  C_check <- abs(C)
+  C_check <- max(C_check) - C_check # flip around to maximize while staying nn
+
+  sol_abs <- RcppHungarian::HungarianSolver(C_check)
+  P_star <- matrix(0, k2, k2)
+  P_star[sol_abs$pairs] <- 1
+
+  signs <- c(diag(sign(C %*% P_star)), rep(0, k2 - k1))
+
+  D_star <- diag(signs)
+
+  P <- P_star %*% D_star
+  return(P)
+}
