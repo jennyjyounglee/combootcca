@@ -908,6 +908,22 @@ mat2vec <- function(mat) c(mat)
 vec2fm <- function(vec, p, q) mat2fm(vec2mat(vec, p, q), p)
 
 vec2mat <- function(vec, p, q) matrix(vec, nrow = p + q)
+
+##' @title Compute the best possible coverage of CCA CIs
+##' @param fm_true
+##' @param cis
+##' @param xyweight A number in [0, 1] indicating how much to weigh coverage of
+##'   x's directions vs y's. If NULL, they are weighted by p and q. If 0, this
+##'   only cares about matching x, if 1, only cares about matching y.
+##' @return
+##' @author Dan Kessler
+cca_ci_coverage_pangloss <- function(fm_true, cis, xyweight = NULL) {
+  cis <- cca_ci_coverage_possibilities(fm_true, cis)
+
+
+}
+
+
 ##' @title Compute All Possible Coverages of CCA CIs
 ##' @param fm_true The result of cancor_cov
 ##' @param cis A list with xcoef and ycoef, which are p x k x 2 and q x k x 2,
@@ -939,6 +955,14 @@ cca_ci_coverage_possibilities <- function(fm_true, cis) {
     }
   }
   return(res)
+}
+
+##' @title Compute the lengths of CCA CIs
+##' @param cis 
+##' @return 
+##' @author Dan Kessler
+cca_ci_lengths <- function(cis) {
+
 }
 
 ##' @title Compute CI coverage for a vector
