@@ -1,5 +1,5 @@
 test_that("All methods for CCA confidence intervals run without errors", {
-  n <- 100
+  n <- 100 # needs to be less than nboots for BCA to work
   p <- 3
   q <- 4
 
