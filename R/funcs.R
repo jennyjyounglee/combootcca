@@ -908,6 +908,39 @@ mat2vec <- function(mat) c(mat)
 vec2fm <- function(vec, p, q) mat2fm(vec2mat(vec, p, q), p)
 
 vec2mat <- function(vec, p, q) matrix(vec, nrow = p + q)
+##' @title Compute All Possible Coverages of CCA CIs
+##' @param fm_true The result of cancor_cov
+##' @param cis A list with xcoef and ycoef, which are p x k x 2 and q x k x 2,
+##'   respectively
+##' @return A list containing two k x k matrix of coverage by components under
+##'   various assignment schemes. Rows index components of fm_true, columns
+##'   index components of cis. xcov_pos holds coverage for x without sign
+##'   flipping, xcov_neg holds coverage for x after a -1 sign flip, ycov_pos and
+##'   ycov_neg are analaogous.
+##' @author Dan Kessler
+cca_ci_coverage_possibilities <- function(fm_true, cis) {
+  k <- length(fm_true$cor)
+
+  empty <- matrix(NA, k, k)
+  res <- list(xcov_pos = empty,
+              xcov_neg = empty,
+              ycov_pos = empty,
+              ycov_neg = empty)
+
+  for (i in 1:k) {
+    for (j in 1:k) {
+      res$xcov_pos <- cca_ci_coverage1(fm_true$xcoef[, i], cis$xcoef[, j, ])
+      res$xcov_neg <- cca_ci_coverage1(-1 * fm_true$xcoef[, i],
+                                       cis$xcoef[, j, ])
+
+      res$ycov_pos <- cca_ci_coverage1(fm_true$ycoef[, i], cis$ycoef[, j, ])
+      res$ycov_neg <- cca_ci_coverage1(-1 * fm_true$ycoef[, i],
+                                       cis$ycoef[, j, ])
+    }
+  }
+  return(res)
+}
+
 ##' @title Compute CI coverage for a vector
 ##' @param true A vector of length p
 ##' @param cis A matrix of size p x 2; first column is lower bound of CI, second
