@@ -1020,12 +1020,12 @@ cca_ci_coverage_possibilities <- function(fm_true, cis) {
 
   for (i in 1:k) {
     for (j in 1:k) {
-      res$xcov_pos <- cca_ci_coverage1(fm_true$xcoef[, i], cis$xcoef[, j, ])
-      res$xcov_neg <- cca_ci_coverage1(-1 * fm_true$xcoef[, i],
+      res$xcov_pos[i, j] <- cca_ci_coverage1(fm_true$xcoef[, i], cis$xcoef[, j, ])
+      res$xcov_neg[i, j] <- cca_ci_coverage1(-1 * fm_true$xcoef[, i],
                                        cis$xcoef[, j, ])
 
-      res$ycov_pos <- cca_ci_coverage1(fm_true$ycoef[, i], cis$ycoef[, j, ])
-      res$ycov_neg <- cca_ci_coverage1(-1 * fm_true$ycoef[, i],
+      res$ycov_pos[i, j] <- cca_ci_coverage1(fm_true$ycoef[, i], cis$ycoef[, j, ])
+      res$ycov_neg[i, j] <- cca_ci_coverage1(-1 * fm_true$ycoef[, i],
                                        cis$ycoef[, j, ])
     }
   }
