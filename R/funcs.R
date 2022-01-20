@@ -1033,11 +1033,15 @@ cca_ci_coverage_possibilities <- function(fm_true, cis) {
 }
 
 ##' @title Compute the lengths of CCA CIs
-##' @param cis 
-##' @return 
+##' @param cis A list with xcoef_ci and ycoef_ci, which are each arrays with
+##'   dimensions p x K x 2 and q x K x 2, respectively
+##' @return A list with xcoef_lengths and ycoef_lengths
 ##' @author Dan Kessler
 cca_ci_lengths <- function(cis) {
-
+  res <- list()
+  res$xcoef_lengths <- apply(cis$xcoef_ci, c(1, 2), diff)
+  res$ycoef_lengths <- apply(cis$ycoef_ci, c(1, 2), diff)
+  return(res)
 }
 
 ##' @title Compute CI coverage for a vector
