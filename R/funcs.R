@@ -1003,11 +1003,11 @@ cca_ci_coverage_signflip <- function(fm_true, cis, xyweight = NULL) {
 ##' @param fm_true The result of cancor_cov
 ##' @param cis A list with xcoef and ycoef, which are p x k x 2 and q x k x 2,
 ##'   respectively
-##' @return A list containing two k x k matrix of coverage by components under
-##'   various assignment schemes. Rows index components of fm_true, columns
-##'   index components of cis. xcov_pos holds coverage for x without sign
-##'   flipping, xcov_neg holds coverage for x after a -1 sign flip, ycov_pos and
-##'   ycov_neg are analaogous.
+##' @return A list containing four k x k matrices of coverage by components
+##'   under various assignment schemes. Rows index components of fm_true,
+##'   columns index components of cis. xcov_pos holds coverage for x without
+##'   sign flipping, xcov_neg holds coverage for x after a -1 sign flip,
+##'   ycov_pos and ycov_neg are analaogous.
 ##' @author Dan Kessler
 cca_ci_coverage_possibilities <- function(fm_true, cis) {
   k <- length(fm_true$cor)
