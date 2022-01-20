@@ -88,6 +88,36 @@ cca_align_greedy_cosx <- function(fm, ref) {
   return(fm)
 }
 
+cca_align_hungarian <- function(fm, ref) {
+  sim_x <- cos_sim(ref$xcoef, fm$xcoef)
+  sim_y <- cos_sim(ref$ycoef, fm$ycoef)
+
+  sim <- apply(abind::abind(sim_x, sim_y, along = 3), c(1, 2), mean)
+
+  P <- hungarian_max_signflip(sim)
+
+  fm$xcoef <- fm$xcoef %*% P
+  fm$ycoef <- fm$ycoef %*% P
+  fm$cor <- as.vector(fm$cor %*% abs(P))
+  return(fm)
+}
+
+cca_align_hungarian_weighted <- function(fm, ref) {
+  sim_x <- cos_sim(ref$xcoef, fm$xcoef)
+  sim_y <- cos_sim(ref$ycoef, fm$ycoef)
+
+  sim <- apply(abind::abind(sim_x, sim_y, along = 3), c(1, 2), mean)
+
+  sim_weighted <- diag(ref$cor) %*% sim
+
+  P <- hungarian_max_signflip(sim_weighted)
+
+  fm$xcoef <- fm$xcoef %*% P
+  fm$ycoef <- fm$ycoef %*% P
+  fm$cor <- as.vector(fm$cor %*% abs(P))
+  return(fm)
+}
+
 ##' @title Compute cosine similarity between columns of two matrices
 ##' @param x Matrix of size n by p
 ##' @param y Matrix of size n by q
