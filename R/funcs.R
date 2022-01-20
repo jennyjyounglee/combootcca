@@ -939,16 +939,38 @@ vec2fm <- function(vec, p, q) mat2fm(vec2mat(vec, p, q), p)
 
 vec2mat <- function(vec, p, q) matrix(vec, nrow = p + q)
 
-##' @title Compute the best possible coverage of CCA CIs
+##' @title Compute the best possible coverage of CCA CIs (allowing both sign
+##'   flips and reassignments)
 ##' @param fm_true
 ##' @param cis
 ##' @param xyweight A number in [0, 1] indicating how much to weigh coverage of
 ##'   x's directions vs y's. If NULL, they are weighted by p and q. If 0, this
 ##'   only cares about matching x, if 1, only cares about matching y.
-##' @return
+##' @return Mean coverage
 ##' @author Dan Kessler
 cca_ci_coverage_pangloss <- function(fm_true, cis, xyweight = NULL) {
-  cis <- cca_ci_coverage_possibilities(fm_true, cis)
+  covs <- cca_ci_coverage_possibilities(fm_true, cis)
+
+  if (is.null(xyweight)) {
+    p <- nrow(fm_true$xcoef)
+    q <- nrow(fm_true$ycoef)
+
+    xyweight <- p / (p + q)
+  }
+
+  cov_pos <- xyweight * covs$xcov_pos + (1 - xyweight) * covs$ycov_pos
+  cov_neg <- xyweight * covs$xcov_neg + (1 - xyweight) * covs$ycov_neg
+
+  cov_posneg <- abind::abind(cov_pos, cov_neg, along = 3)
+  cov_best <- apply(cov_posneg, c(1, 2), max)
+
+  C <- hungarian_max_signflip(cov_best)
+
+  cov_optimal <- cov_best %*% C
+
+  cov_mean <- mean(diag(cov_optimal))
+  return(cov_mean)
+}
 
 
 }
