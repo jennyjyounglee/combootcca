@@ -972,7 +972,30 @@ cca_ci_coverage_pangloss <- function(fm_true, cis, xyweight = NULL) {
   return(cov_mean)
 }
 
+##' @title Compute the coverage of CCA CIs allowing sign flips
+##' @param fm_true 
+##' @param cis 
+##' @param xyweight 
+##' @return Mean coverage
+##' @author Dan Kessler
+cca_ci_coverage_signflip <- function(fm_true, cis, xyweight = NULL) {
+  covs <- cca_ci_coverage_possibilities(fm_true, cis)
 
+  if (is.null(xyweight)) {
+    p <- nrow(fm_true$xcoef)
+    q <- nrow(fm_true$ycoef)
+
+    xyweight <- p / (p + q)
+  }
+
+  cov_pos <- xyweight * covs$xcov_pos + (1 - xyweight) * covs$ycov_pos
+  cov_neg <- xyweight * covs$xcov_neg + (1 - xyweight) * covs$ycov_neg
+
+  cov_posneg <- abind::abind(cov_pos, cov_neg, along = 3)
+  cov_best <- apply(cov_posneg, c(1, 2), max)
+
+  cov_mean <- mean(diag(cov_best))
+  return(cov_mean)
 }
 
 
