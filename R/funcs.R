@@ -660,7 +660,19 @@ coverage_experiment <- function(outreps = 1L, inreps = 1L, p = 2, q = 2,
               length = length, sigma = sigma))
 }
 
-
+##' Draw data for use in CCA estimation according to a user-specified covariance
+##' matrix.
+##'
+##' @title Draw CCA data according to covariance Sigma
+##' @param Sigma Square, positive definite covariance matrix with p + q
+##'   rows/cols
+##' @param p The dimension of the random variable X
+##' @param q The dimension of the random variable Y
+##' @param n The number of observations to draw
+##' @return A list with two fields: x and y. They are matrices of size n by p
+##'   and n by q, respectively.
+##' @author Dan Kessler
+##' @export
 gen_data <- function(Sigma, p, q, n) {
   Sigma_r <- chol(Sigma)
 
