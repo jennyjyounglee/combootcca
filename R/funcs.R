@@ -816,7 +816,7 @@ bt_problem_std_fun <- function(job = NULL, data = NULL, sigma = NULL, p = NULL,
   prob_fun_inner <- function(data = NULL) {
     res <- list()
     if (!is.null(data)) res$data <- data
-    if (is.null(data)) res$data <- ccasleuth:::gen_data(sigma, p, q, n)
+    if (is.null(data)) res$data <- gen_data(sigma, p, q, n)
     res$fm_hat <- cancor_scaled(res$data$x, res$data$y)
     return(res)
   }
@@ -827,7 +827,7 @@ bt_problem_std_fun <- function(job = NULL, data = NULL, sigma = NULL, p = NULL,
   if (!is.null(data)) instance$inreps[1] <- prob_fun_inner(data = data)
 
   if (is.null(data)) {
-    if (is.null(sigma)) sigma <- ccasleuth:::gen_sigma(p, q)
+    if (is.null(sigma)) sigma <- gen_sigma(p, q)
     instance$inreps <- replicate(inreps, prob_fun_inner(), simplify = FALSE)
   }
 
