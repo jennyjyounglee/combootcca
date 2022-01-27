@@ -1002,6 +1002,7 @@ vec2mat <- function(vec, p, q) matrix(vec, nrow = p + q)
 ##'   only cares about matching x, if 1, only cares about matching y.
 ##' @return Mean coverage
 ##' @author Dan Kessler
+##' @export
 cca_ci_coverage_pangloss <- function(fm_true, cis, xyweight = NULL) {
   covs <- cca_ci_coverage_possibilities(fm_true, cis)
 
@@ -1027,11 +1028,10 @@ cca_ci_coverage_pangloss <- function(fm_true, cis, xyweight = NULL) {
 }
 
 ##' @title Compute the coverage of CCA CIs allowing sign flips
-##' @param fm_true 
-##' @param cis 
-##' @param xyweight 
+##' @inheritParams cca_ci_coverage_pangloss
 ##' @return Mean coverage
 ##' @author Dan Kessler
+##' @export
 cca_ci_coverage_signflip <- function(fm_true, cis, xyweight = NULL) {
   covs <- cca_ci_coverage_possibilities(fm_true, cis)
 

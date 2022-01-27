@@ -7,11 +7,13 @@
 cca_ci_coverage_signflip(fm_true, cis, xyweight = NULL)
 }
 \arguments{
-\item{fm_true}{}
+\item{fm_true}{The "true" fitted model}
 
-\item{cis}{}
+\item{cis}{Confidence intervals}
 
-\item{xyweight}{}
+\item{xyweight}{A number in \link{0, 1} indicating how much to weigh coverage of
+x's directions vs y's. If NULL, they are weighted by p and q. If 0, this
+only cares about matching x, if 1, only cares about matching y.}
 }
 \value{
 Mean coverage

@@ -8,6 +8,10 @@ flips and reassignments)}
 cca_ci_coverage_pangloss(fm_true, cis, xyweight = NULL)
 }
 \arguments{
+\item{fm_true}{The "true" fitted model}
+
+\item{cis}{Confidence intervals}
+
 \item{xyweight}{A number in \link{0, 1} indicating how much to weigh coverage of
 x's directions vs y's. If NULL, they are weighted by p and q. If 0, this
 only cares about matching x, if 1, only cares about matching y.}
