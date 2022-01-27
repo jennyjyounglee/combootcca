@@ -953,8 +953,8 @@ vec2mat <- function(vec, p, q) matrix(vec, nrow = p + q)
 
 ##' @title Compute the best possible coverage of CCA CIs (allowing both sign
 ##'   flips and reassignments)
-##' @param fm_true
-##' @param cis
+##' @param fm_true The "true" fitted model
+##' @param cis Confidence intervals
 ##' @param xyweight A number in [0, 1] indicating how much to weigh coverage of
 ##'   x's directions vs y's. If NULL, they are weighted by p and q. If 0, this
 ##'   only cares about matching x, if 1, only cares about matching y.
