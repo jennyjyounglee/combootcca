@@ -683,7 +683,47 @@ gen_data <- function(Sigma, p, q, n) {
   return(res)
 }
 
-gen_sigma <- function(p, q) {
+##' Generate a square covariance matrix for use with CCA.
+##'
+##' For CCA simulation studies, it is convenient to be able to generate a
+##' "random" covariance matrix. The current approach is quite simple. It first
+##' creates identity matrices of size p and q that serve as the covariance of X
+##' and Y, respectively. These are placed along the diagonal of the covariance
+##' matrix.
+##'
+##' Next, a random sequence of singular values (the canonical correlations) are
+##' generated. The difficulty of the estimation problem is (probably) a function
+##' of both how big the canonical correlations are as well as their separation.
+##' Currently, the largest canonical correlation will be set to rho_max. The
+##' remaining canonical correlations will begin at rho_max - rho_gap and then
+##' decay exponentially according to (rho_max - rho_gap)^((t - 1) * rho_decay),
+##' where t is an integer that indicates the index of the canonical correlation.
+##'
+##' It is contingent on the user to ensure that rho_max is in (0, 1) and that
+##' rho_max minus rho_gap is strictly greater than 0.
+##'
+##' Initially, the canonical correlations are placed along the diagonal of a
+##' putative cross-covariance matrix, but to make the problem non-trivial, a
+##' random orthogonal matrix (drawn with respect to Haar measure) is applied
+##' from the left and the right before whitening with the square roots of the
+##' covariance matrices of X and Y (although since these are identity matrices
+##' at the moment, this last step has no effect).
+##' @title Generate random covariance matrix for CCA
+##' @param p Dimension of X random variable
+##' @param q Dimension of Y random variable
+##' @param rho_max The largest canonical correlation (must be between 0 and 1)
+##' @param rho_gap The gap between the largest and second-largest canonical
+##'   correlation
+##' @param rho_decay The rate at which the canonical correlations (after the
+##'   first) decay. Should be a strictly positive number. Small values will give
+##'   very gradual decay and poor spacing, very large values will asymptote at 0
+##'   very quickly and also give poor spacing. See details for more information.
+##' @return A square, positive definite matrix with p+q rows/cols
+##' @author Dan Kessler
+##' @export
+gen_sigma <- function(p, q, rho_max = 0.9, rho_gap = 0.1, rho_decay = 1) {
+  K <- min(p, q)
+
   sxx <- diag(p)
   syy <- diag(q)
 
@@ -693,7 +733,9 @@ gen_sigma <- function(p, q) {
   qx <- randortho_fixed(p)
   qy <- randortho_fixed(q)
 
-  rho <- sort(runif(min(p, q)), decreasing = TRUE)
+  rho <- rep(0, K)
+  rho[1] <- rho_max
+  rho[2:K] <- (rho_max - rho_gap)^(rho_decay * (2:K - 1))
   s <- matrix(0, q, p)
   diag(s) <- rho
 
