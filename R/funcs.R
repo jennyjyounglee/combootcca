@@ -718,7 +718,7 @@ gen_data <- function(Sigma, p, q, n) {
 ##' and Y, respectively. These are placed along the diagonal of the covariance
 ##' matrix.
 ##'
-##' Next, a random sequence of singular values (the canonical correlations) are
+##' Next, a sequence of singular values (the canonical correlations) are
 ##' generated. The difficulty of the estimation problem is (probably) a function
 ##' of both how big the canonical correlations are as well as their separation.
 ##' Currently, the largest canonical correlation will be set to rho_max. The
