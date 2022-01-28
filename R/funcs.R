@@ -920,16 +920,20 @@ bt_problem_std_fun <- function(job = NULL, data = NULL, sigma = NULL, p = NULL,
 ##' @title Generic inrep function for batchtools algorithms
 ##' @param inrep The inrep object
 ##' @param ci_func A function that follows the cca_ci_* API
-##' @param ... Arguments passed on to ci_func
+##' @param met_func A function to compute performance metrics
+##' @param fm_true The true parameters
+##' @param ... Arguments passed on to ci_func and met_func
 ##' @return CIs as returned by ci_func
 ##' @author Dan Kessler
-bt_algo_inrep <- function(inrep, ci_func, ...) {
-  res <- ci_func(
+##' @export
+bt_algo_inrep <- function(inrep, ci_func, met_func, fm_true, ...) {
+  cis <- ci_func(
     x = inrep$data$x,
     y = inrep$data$y,
     ref = inrep$fm_hat,
     ...
   )
+  res <- met_func(fm_true, cis, ...)
   return(res)
 }
 
@@ -942,11 +946,14 @@ bt_algo_inrep <- function(inrep, ci_func, ...) {
 ##' @export
 ##' @author Dan Kessler
 bt_algo_asymptotic <- function(job, data, instance, ...) {
-  res <- lapply(instance$inreps, bt_algo_inrep,
+  res_inreps <- lapply(instance$inreps, bt_algo_inrep,
     ci_func = cca_ci_asymptotic,
-    align = cca_align_posdiag,
+    align = cca_align_greedy_cosy,
+    met_func = cca_metric_standard,
+    fm_true = instance$fm_true,
     ...
   )
+  res <- data.table::rbindlist(res_inreps, idcol= "inrep.id")
   return(res)
 }
 
@@ -959,11 +966,14 @@ bt_algo_asymptotic <- function(job, data, instance, ...) {
 ##' @export
 ##' @author Dan Kessler
 bt_algo_absboot <- function(job, data, instance, ...) {
-  res <- lapply(instance$inreps, bt_algo_inrep,
+  res_inreps <- lapply(instance$inreps, bt_algo_inrep,
     ci_func = cca_ci_absboot,
-    align = cca_align_posdiag,
+    align = cca_align_greedy_cosy,
+    met_func = cca_metric_standard,
+    fm_true = instance$fm_true,
     ...
   )
+  res <- data.table::rbindlist(res_inreps, idcol= "inrep.id")
   return(res)
 }
 
@@ -976,11 +986,14 @@ bt_algo_absboot <- function(job, data, instance, ...) {
 ##' @export
 ##' @author Dan Kessler
 bt_algo_regression <- function(job, data, instance, ...) {
-  res <- lapply(instance$inreps, bt_algo_inrep,
+  res_inreps <- lapply(instance$inreps, bt_algo_inrep,
     ci_func = cca_ci_regression,
-    align = cca_align_posdiag,
+    align = cca_align_greedy_cosy,
+    met_func = cca_metric_standard,
+    fm_true = instance$fm_true,
     ...
   )
+  res <- data.table::rbindlist(res_inreps, idcol= "inrep.id")
   return(res)
 }
 
@@ -993,11 +1006,14 @@ bt_algo_regression <- function(job, data, instance, ...) {
 ##' @export
 ##' @author Dan Kessler
 bt_algo_boot <- function(job, data, instance, ...) {
-  res <- lapply(instance$inreps, bt_algo_inrep,
+  res_inreps <- lapply(instance$inreps, bt_algo_inrep,
     ci_func = cca_ci_boot,
-    align = cca_align_posdiag,
+    align = cca_align_greedy_cosy,
+    met_func = cca_metric_standard,
+    fm_true = instance$fm_true,
     ...
   )
+  res <- data.table::rbindlist(res_inreps, idcol= "inrep.id")
   return(res)
 }
 
@@ -1183,4 +1199,13 @@ hungarian_max_signflip <- function(C) {
 
   P <- P_star %*% D_star
   return(P)
+}
+
+cca_metric_standard <- function(fm_true, cis, ...) {
+  ## compute lengths and coverages
+
+  covs <- cca_ci_coverage_signflip(fm_true, cis)
+  lengths <- cca_ci_lengths(cis)
+  res <- rbind(covs, lengths)
+  return(res)
 }
