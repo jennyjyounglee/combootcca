@@ -209,7 +209,7 @@ cancor_scaled <- function(x, y, xcenter = TRUE, ycenter = TRUE,
 ##' @return List with two objects: xcoef_ci and ycoef_ci.
 ##' @author Dan Kessler
 ##' @export
-cca_ci_asymptotic <- function(x, y, level = .95,
+cca_ci_asymptotic <- function(x, y, level = .90,
                               align = cca_align_posdiag, ref) {
   n <- nrow(x)
   p <- ncol(x)
@@ -296,7 +296,7 @@ cca_ci_asymptotic <- function(x, y, level = .95,
 ##' @return List with two objects: xcoef_ci and ycoef_ci.
 ##' @author Daniel Kessler
 ##' @export
-cca_ci_absboot <- function(x, y, level = .95, align = cca_align_posdiag, ref,
+cca_ci_absboot <- function(x, y, level = .90, align = cca_align_posdiag, ref,
                              nboots = 1e3, parametric = FALSE, progress = 0) {
   n <- nrow(x)
   p <- ncol(x)
@@ -401,7 +401,7 @@ cca_ci_absboot <- function(x, y, level = .95, align = cca_align_posdiag, ref,
 ##' @return List with two objects: xcoef_ci and ycoef_ci.
 ##' @author Dan Kessler
 ##' @export
-cca_ci_regression <- function(x, y, level = .95, align = cca_align_posdiag, ref,
+cca_ci_regression <- function(x, y, level = .90, align = cca_align_posdiag, ref,
                               train_ratio = 0.5) {
   n <- nrow(x)
   p <- ncol(x)
