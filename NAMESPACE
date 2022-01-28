@@ -3,6 +3,7 @@
 export(bt_algo_absboot)
 export(bt_algo_asymptotic)
 export(bt_algo_boot)
+export(bt_algo_inrep)
 export(bt_algo_regression)
 export(bt_problem_std_fun)
 export(cancor_cov)

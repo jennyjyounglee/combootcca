@@ -11,7 +11,8 @@ bt_problem_std_fun(
   p = NULL,
   q = NULL,
   n = NULL,
-  inreps = 1L
+  inreps = 1L,
+  ...
 )
 }
 \arguments{
@@ -29,6 +30,8 @@ each is an n by p and n by q matrix, respectively}
 \item{n}{The number of observations}
 
 \item{inreps}{How many replicates to draw}
+
+\item{...}{Additional arguments passed to gen_sigma}
 }
 \value{
 An instance

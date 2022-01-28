@@ -11,7 +11,7 @@ cca_ci_lengths(cis)
 dimensions p x K x 2 and q x K x 2, respectively}
 }
 \value{
-A list with xcoef_lengths and ycoef_lengths
+A data.table of lengths
 }
 \description{
 Compute the lengths of CCA CIs

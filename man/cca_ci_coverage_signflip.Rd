@@ -16,7 +16,7 @@ x's directions vs y's. If NULL, they are weighted by p and q. If 0, this
 only cares about matching x, if 1, only cares about matching y.}
 }
 \value{
-Mean coverage
+data table of coverage by variable by component
 }
 \description{
 Compute the coverage of CCA CIs allowing sign flips

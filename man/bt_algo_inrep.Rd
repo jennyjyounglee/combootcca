@@ -4,14 +4,18 @@
 \alias{bt_algo_inrep}
 \title{Generic inrep function for batchtools algorithms}
 \usage{
-bt_algo_inrep(inrep, ci_func, ...)
+bt_algo_inrep(inrep, ci_func, met_func, fm_true, ...)
 }
 \arguments{
 \item{inrep}{The inrep object}
 
 \item{ci_func}{A function that follows the cca_ci_* API}
 
-\item{...}{Arguments passed on to ci_func}
+\item{met_func}{A function to compute performance metrics}
+
+\item{fm_true}{The true parameters}
+
+\item{...}{Arguments passed on to ci_func and met_func}
 }
 \value{
 CIs as returned by ci_func
