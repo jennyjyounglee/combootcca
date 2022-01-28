@@ -887,11 +887,12 @@ cancor_vec <- function(data, p, align, ref) {
 ##' @param q The dimension of the random variable Y
 ##' @param n The number of observations
 ##' @param inreps How many replicates to draw
+##' @param ... Additional arguments passed to gen_sigma
 ##' @return An instance
 ##' @author Daniel Kessler
 ##' @export
 bt_problem_std_fun <- function(job = NULL, data = NULL, sigma = NULL, p = NULL,
-                               q = NULL, n = NULL, inreps = 1L) {
+                               q = NULL, n = NULL, inreps = 1L, ...) {
   prob_fun_inner <- function(data = NULL) {
     res <- list()
     if (!is.null(data)) res$data <- data
@@ -906,7 +907,7 @@ bt_problem_std_fun <- function(job = NULL, data = NULL, sigma = NULL, p = NULL,
   if (!is.null(data)) instance$inreps[1] <- prob_fun_inner(data = data)
 
   if (is.null(data)) {
-    if (is.null(sigma)) sigma <- gen_sigma(p, q)
+    if (is.null(sigma)) sigma <- gen_sigma(p, q, ...)
     instance$inreps <- replicate(inreps, prob_fun_inner(), simplify = FALSE)
   }
 
