@@ -1054,10 +1054,12 @@ cca_ci_coverage_pangloss <- function(fm_true, cis, xyweight = NULL) {
 
 ##' @title Compute the coverage of CCA CIs allowing sign flips
 ##' @inheritParams cca_ci_coverage_pangloss
-##' @return Mean coverage
+##' @return data table of coverage by variable by component
 ##' @author Dan Kessler
 ##' @export
 cca_ci_coverage_signflip <- function(fm_true, cis, xyweight = NULL) {
+  K <- length(fm_true$cor)
+
   covs <- cca_ci_coverage_possibilities(fm_true, cis)
 
   if (is.null(xyweight)) {
@@ -1071,10 +1073,17 @@ cca_ci_coverage_signflip <- function(fm_true, cis, xyweight = NULL) {
   cov_neg <- xyweight * covs$xcov_neg + (1 - xyweight) * covs$ycov_neg
 
   cov_posneg <- abind::abind(cov_pos, cov_neg, along = 3)
-  cov_best <- apply(cov_posneg, c(1, 2), max)
+  cov_best_ind <- apply(cov_posneg, c(1, 2), which.max)
 
-  cov_mean <- mean(diag(cov_best))
-  return(cov_mean)
+  cov_x <- ifelse(cov_best_ind == 1, diag(covs$xcov_pos), diag(covs$xcov_neg))
+  cov_y <- ifelse(cov_best_ind == 1, diag(covs$ycov_pos), diag(covs$ycov_neg))
+
+  res <- data.table::data.table(
+                       metric = "coverage",
+                       component = rep(1:K, 2),
+                       variable = c(rep("X", K), rep("Y", K)),
+                       value = c(cov_x, cov_y))
+  return(res)
 }
 
 
@@ -1114,12 +1123,19 @@ cca_ci_coverage_possibilities <- function(fm_true, cis) {
 ##' @title Compute the lengths of CCA CIs
 ##' @param cis A list with xcoef_ci and ycoef_ci, which are each arrays with
 ##'   dimensions p x K x 2 and q x K x 2, respectively
-##' @return A list with xcoef_lengths and ycoef_lengths
+##' @return A data.table of lengths
 ##' @author Dan Kessler
 cca_ci_lengths <- function(cis) {
-  res <- list()
-  res$xcoef_lengths <- apply(cis$xcoef_ci, c(1, 2), diff)
-  res$ycoef_lengths <- apply(cis$ycoef_ci, c(1, 2), diff)
+  K <- dim(cis$xcoef_ci)[2]
+
+  xcoef_lengths <- apply(cis$xcoef_ci, c(1, 2), diff)
+  ycoef_lengths <- apply(cis$ycoef_ci, c(1, 2), diff)
+
+  res <- data.table::data.table(
+                       metric = "length",
+                       component = rep(1:K, 2),
+                       variable = c(rep("X", K), rep("Y", K)),
+                       value = c(xcoef_lengths, ycoef_lengths))
   return(res)
 }
 
