@@ -536,6 +536,8 @@ cca_ci_boot <- function(x, y, level=0.90, align = cca_align_posdiag,
     ci_bca = ci_glue(ci_bca_flat)
   )
 
+  res <- ci_glue(ci_perc_flat) #hack to use percentiles for now
+
   return(res)
 }
 
