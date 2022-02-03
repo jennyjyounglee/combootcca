@@ -735,6 +735,9 @@ gen_data <- function(Sigma, p, q, n) {
 ##' from the left and the right before whitening with the square roots of the
 ##' covariance matrices of X and Y (although since these are identity matrices
 ##' at the moment, this last step has no effect).
+##'
+##' Note: For now, the rotations are actually hard-coded to be identity matrices
+##' to make the problem very sparse.
 ##' @title Generate random covariance matrix for CCA
 ##' @param p Dimension of X random variable
 ##' @param q Dimension of Y random variable
@@ -759,6 +762,10 @@ gen_sigma <- function(p, q, rho_max = 0.9, rho_gap = 0.1, rho_decay = 1) {
 
   qx <- randortho_fixed(p)
   qy <- randortho_fixed(q)
+
+  ## use identity rotations for now
+  qx <- diag(p)
+  qy <- diag(q)
 
   rho <- rep(0, K)
   rho[1] <- rho_max
