@@ -1221,7 +1221,8 @@ cca_metric_standard <- function(fm_true, cis, ...) {
 
   covs <- cca_ci_coverage_signflip(fm_true, cis)
   lengths <- cca_ci_lengths(cis)
-  res <- rbind(covs, lengths)
+  sigdet <- cca_ci_sigdet(fm_true, cis)
+  res <- rbind(covs, lengths, sigdet)
   return(res)
 }
 
@@ -1249,5 +1250,42 @@ cca_ci_coverage_raw1 <- function(true_coef, cis_coef) {
                        component = rep(1:K, each = p),
                        coordinate = 1:p,
                        value = cover)
+  return(res)
+}
+
+cca_ci_sigdet <- function(fm_true, cis) {
+  sigdets <- list()
+  sigdets$x <- cca_ci_sigdet1(fm_true$xcoef, cis$xcoef)
+  sigdets$y <- cca_ci_sigdet1(fm_true$ycoef, cis$ycoef)
+
+  sigdet <- data.table::rbindlist(sigdets, idcol = "variable")
+  return(sigdet)
+}
+
+cca_ci_sigdet1 <- function(true_coef, cis_coef) {
+  p <- nrow(true_coef)
+  K <- ncol(true_coef)
+
+
+  ci_nz <- cis_coef[, , 1] >= 0 | 0 >= cis_coef[, , 2]
+  true_nz <- true_coef != 0
+
+  ## bit encoding:
+  ## true_nz: 1 if nonzero, 0 if zero
+  ## ci_nz: 2 if CI does not contain zero, 0 if it does
+  ## take the sum, and get this table
+  ## 0: True Negative
+  ## 1: False Negative
+  ## 2: False Positive
+  ## 3: True Positive
+  sigdet <- true_nz + (2 * ci_nz)
+
+  res <- data.table::data.table(
+    metric = "sigdet",
+    component = rep(1:K, each = p),
+    coordinate = 1:p,
+    value = c(sigdet)
+  )
+
   return(res)
 }
