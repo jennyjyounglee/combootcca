@@ -7,7 +7,7 @@
 cca_ci_lengths(cis)
 }
 \arguments{
-\item{cis}{A list with xcoef_ci and ycoef_ci, which are each arrays with
+\item{cis}{A list with xcoef and ycoef, which are each arrays with
 dimensions p x K x 2 and q x K x 2, respectively}
 }
 \value{

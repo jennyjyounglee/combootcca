@@ -32,7 +32,7 @@ multivariate normal distribution following sample covariance}
 integer k, report bootstrap progress every k'th run.}
 }
 \value{
-List with two objects: xcoef_ci and ycoef_ci.
+List with two objects: xcoef and ycoef.
 }
 \description{
 Bootstrap absolute quantiles to generate CCA confidence intervals

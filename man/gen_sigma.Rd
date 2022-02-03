@@ -34,7 +34,7 @@ creates identity matrices of size p and q that serve as the covariance of X
 and Y, respectively. These are placed along the diagonal of the covariance
 matrix.
 
-Next, a random sequence of singular values (the canonical correlations) are
+Next, a sequence of singular values (the canonical correlations) are
 generated. The difficulty of the estimation problem is (probably) a function
 of both how big the canonical correlations are as well as their separation.
 Currently, the largest canonical correlation will be set to rho_max. The
@@ -51,6 +51,9 @@ random orthogonal matrix (drawn with respect to Haar measure) is applied
 from the left and the right before whitening with the square roots of the
 covariance matrices of X and Y (although since these are identity matrices
 at the moment, this last step has no effect).
+
+Note: For now, the rotations are actually hard-coded to be identity matrices
+to make the problem very sparse.
 }
 \author{
 Dan Kessler

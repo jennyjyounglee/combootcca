@@ -24,7 +24,7 @@ cca_ci_regression(
 CCA directions}
 }
 \value{
-List with two objects: xcoef_ci and ycoef_ci.
+List with two objects: xcoef and ycoef.
 }
 \description{
 Obtain confidence intervals for canonical correlation analysis directions by

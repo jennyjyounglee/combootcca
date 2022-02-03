@@ -22,7 +22,7 @@ have to use it).}
 \item{ref}{A reference solution to align against}
 }
 \value{
-List with two objects: xcoef_ci and ycoef_ci.
+List with two objects: xcoef and ycoef.
 }
 \description{
 Obtain confidence intervals for the "directions" of a canonical correlation
