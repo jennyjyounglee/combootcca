@@ -206,7 +206,7 @@ cancor_scaled <- function(x, y, xcenter = TRUE, ycenter = TRUE,
 ##'   non-negative. Should also take "ref" or "..." as an argument (but doesn't
 ##'   have to use it).
 ##' @param ref A reference solution to align against
-##' @return List with two objects: xcoef_ci and ycoef_ci.
+##' @return List with two objects: xcoef and ycoef.
 ##' @author Dan Kessler
 ##' @export
 cca_ci_asymptotic <- function(x, y, level = .90,
@@ -277,7 +277,7 @@ cca_ci_asymptotic <- function(x, y, level = .90,
   ycoef_ci[, , 2] <- fm$ycoef + sqrt(yvar / n) * zcrit
 
 
-  res <- list(xcoef_ci = xcoef_ci, ycoef_ci = ycoef_ci)
+  res <- list(xcoef = xcoef_ci, ycoef = ycoef_ci)
   return(res)
 }
 
@@ -293,7 +293,7 @@ cca_ci_asymptotic <- function(x, y, level = .90,
 ##'   multivariate normal distribution following sample covariance
 ##' @param progress If 0 (default), don't report progress. If set to a positive
 ##'   integer k, report bootstrap progress every k'th run.
-##' @return List with two objects: xcoef_ci and ycoef_ci.
+##' @return List with two objects: xcoef and ycoef.
 ##' @author Daniel Kessler
 ##' @export
 cca_ci_absboot <- function(x, y, level = .90, align = cca_align_posdiag, ref,
@@ -369,7 +369,7 @@ cca_ci_absboot <- function(x, y, level = .90, align = cca_align_posdiag, ref,
   ycoef_ci[, , 2] <- ycoef_hat + ycoef_t
 
 
-  res <- list(xcoef_ci = xcoef_ci, ycoef_ci = ycoef_ci)
+  res <- list(xcoef = xcoef_ci, ycoef = ycoef_ci)
   return(res)
 }
 
@@ -398,7 +398,7 @@ cca_ci_absboot <- function(x, y, level = .90, align = cca_align_posdiag, ref,
 ##' @param level Level for confidence intervals, should be in (0, 1)
 ##' @param train_ratio What proportion of the data should be used for estimating
 ##'   CCA directions
-##' @return List with two objects: xcoef_ci and ycoef_ci.
+##' @return List with two objects: xcoef and ycoef.
 ##' @author Dan Kessler
 ##' @export
 cca_ci_regression <- function(x, y, level = .90, align = cca_align_posdiag, ref,
@@ -445,7 +445,7 @@ cca_ci_regression <- function(x, y, level = .90, align = cca_align_posdiag, ref,
     ycoef_ci[, k, 2] <- confint(fm2_ypred)[-1, 2]
   }
 
-  res <- list(xcoef_ci = xcoef_ci, ycoef_ci = ycoef_ci)
+  res <- list(xcoef = xcoef_ci, ycoef = ycoef_ci)
   return(res)
 }
 
@@ -525,7 +525,7 @@ cca_ci_boot <- function(x, y, level=0.90, align = cca_align_posdiag,
     ycoef_ci <- abind::abind(ci_lower$ycoef, ci_upper$ycoef, along = 3)
     dimnames(ycoef_ci) <- adimnames
 
-    fm <- list(xcoef_ci = xcoef_ci, ycoef_ci = ycoef_ci)
+    fm <- list(xcoef = xcoef_ci, ycoef = ycoef_ci)
     return(fm)
   }
 
@@ -1140,12 +1140,12 @@ cca_ci_coverage_possibilities <- function(fm_true, cis) {
 }
 
 ##' @title Compute the lengths of CCA CIs
-##' @param cis A list with xcoef_ci and ycoef_ci, which are each arrays with
+##' @param cis A list with xcoef and ycoef, which are each arrays with
 ##'   dimensions p x K x 2 and q x K x 2, respectively
 ##' @return A data.table of lengths
 ##' @author Dan Kessler
 cca_ci_lengths <- function(cis) {
-  K <- dim(cis$xcoef_ci)[2]
+  K <- dim(cis$xcoef)[2]
 
   xcoef_lengths <- apply(cis$xcoef_ci, c(1, 2), diff)
   ycoef_lengths <- apply(cis$ycoef_ci, c(1, 2), diff)
