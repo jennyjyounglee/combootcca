@@ -1092,16 +1092,18 @@ cca_ci_coverage_signflip <- function(fm_true, cis, xyweight = NULL) {
   cov_neg <- xyweight * covs$xcov_neg + (1 - xyweight) * covs$ycov_neg
 
   cov_posneg <- abind::abind(cov_pos, cov_neg, along = 3)
-  cov_best_ind <- apply(cov_posneg, c(1, 2), which.max)
+  cov_best_ind <- diag(apply(cov_posneg, c(1, 2), which.max))
 
-  cov_x <- ifelse(cov_best_ind == 1, diag(covs$xcov_pos), diag(covs$xcov_neg))
-  cov_y <- ifelse(cov_best_ind == 1, diag(covs$ycov_pos), diag(covs$ycov_neg))
+  cov_best_sign <- ifelse(cov_best_ind == 1, 1, -1)
+  sign_flip_mat <- diag(cov_best_sign)
 
-  res <- data.table::data.table(
-                       metric = "coverage",
-                       component = rep(1:K, 2),
-                       variable = c(rep("X", K), rep("Y", K)),
-                       value = c(cov_x, cov_y))
+  ## it's actually easier to "flip" the true parameter
+  ## O/w, we have to swap upper/lower confidence bounds, too
+  fm_true_flip <- fm_true
+  fm_true_flip$xcoef <- fm_true$xcoef %*% sign_flip_mat
+  fm_true_flip$ycoef <- fm_true$ycoef %*% sign_flip_mat
+
+  res <- cca_ci_coverage_raw(fm_true_flip, cis)
   return(res)
 }
 
