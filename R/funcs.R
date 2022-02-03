@@ -1147,18 +1147,29 @@ cca_ci_coverage_possibilities <- function(fm_true, cis) {
 ##' @return A data.table of lengths
 ##' @author Dan Kessler
 cca_ci_lengths <- function(cis) {
-  K <- dim(cis$xcoef)[2]
+  lengths <- list()
+  lengths$x <- cca_ci_lengths1(cis$xcoef)
+  lengths$y <- cca_ci_lengths1(cis$ycoef)
 
-  xcoef_lengths <- apply(cis$xcoef_ci, c(1, 2), diff)
-  ycoef_lengths <- apply(cis$ycoef_ci, c(1, 2), diff)
-
-  res <- data.table::data.table(
-                       metric = "length",
-                       component = rep(1:K, 2),
-                       variable = c(rep("X", K), rep("Y", K)),
-                       value = c(xcoef_lengths, ycoef_lengths))
+  res <- data.table::rbindlist(lengths, idcol = "variable")
   return(res)
 }
+
+cca_ci_lengths1 <- function(cis_coef) {
+  p <- dim(cis_coef)[1]
+  K <- dim(cis_coef)[2]
+
+  lengths <- apply(cis_coef, c(1, 2), diff)
+
+  res <- data.table::data.table(
+    metric = "length",
+    component = rep(1:K, each = p),
+    coordinate = 1:p,
+    value = c(lengths)
+  )
+  return(res)
+}
+
 
 ##' @title Compute CI coverage for a vector
 ##' @param true A vector of length p
@@ -1211,5 +1222,32 @@ cca_metric_standard <- function(fm_true, cis, ...) {
   covs <- cca_ci_coverage_signflip(fm_true, cis)
   lengths <- cca_ci_lengths(cis)
   res <- rbind(covs, lengths)
+  return(res)
+}
+
+cca_ci_coverage_raw <- function(fm_true, cis) {
+  ## Compute coverage by variable, by component, and by coordinate. No
+  ## adjustment is done for sign flipping or alignment
+
+  covs <- list()
+  covs$x <- cca_ci_coverage_raw1(fm_true$xcoef, cis$xcoef)
+  covs$y <- cca_ci_coverage_raw1(fm_true$ycoef, cis$ycoef)
+
+  coverage <- data.table::rbindlist(covs, idcol = "variable")
+  return(coverage)
+}
+
+cca_ci_coverage_raw1 <- function(true_coef, cis_coef) {
+  ## Compute coverage for a single variable by coordinate
+  p <- nrow(true_coef)
+  K <- ncol(true_coef)
+
+  cover <- as.numeric(cis_coef[, , 1] <= true_coef & true_coef <= cis_coef[, , 2])
+
+  res <- data.table::data.table(
+                       metric = "coverage",
+                       component = rep(1:K, each = p),
+                       coordinate = 1:p,
+                       value = cover)
   return(res)
 }
