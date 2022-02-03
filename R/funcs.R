@@ -438,11 +438,11 @@ cca_ci_regression <- function(x, y, level = .90, align = cca_align_posdiag, ref,
     fm2_ypred <- lm_scalefix(lm(x2scores[, k] ~ y2))
 
 
-    xcoef_ci[, k, 1] <- confint(fm2_xpred)[-1, 1]
-    xcoef_ci[, k, 2] <- confint(fm2_xpred)[-1, 2]
+    xcoef_ci[, k, 1] <- confint(fm2_xpred, level = level)[-1, 1]
+    xcoef_ci[, k, 2] <- confint(fm2_xpred, level = level)[-1, 2]
 
-    ycoef_ci[, k, 1] <- confint(fm2_ypred)[-1, 1]
-    ycoef_ci[, k, 2] <- confint(fm2_ypred)[-1, 2]
+    ycoef_ci[, k, 1] <- confint(fm2_ypred, level = level)[-1, 1]
+    ycoef_ci[, k, 2] <- confint(fm2_ypred, level = level)[-1, 2]
   }
 
   res <- list(xcoef = xcoef_ci, ycoef = ycoef_ci)
