@@ -13,11 +13,11 @@ test_that("All methods for CCA confidence intervals run without errors", {
   suppressWarnings(expect_error(cca_ci_boot(x, y), NA))
 })
 
-test_that("Coverage Assessments Works", {
+test_that("Standard Metrics Work", {
 
-  n <- 1e3
-  p <- 20
-  q <- 20
+  n <- 1e6
+  p <- 3
+  q <- 3
 
   Sigma <- gen_sigma(p, q)
   fm_true <- cancor_cov(Sigma, px = p)
@@ -26,13 +26,10 @@ test_that("Coverage Assessments Works", {
 
   fm_hat <- cancor_scaled(dat$x, dat$y)
 
-  cis <- cca_ci_regression(dat$x, dat$y, align = cca_align_greedy_cosx, ref = fm_hat)
+  cis <- cca_ci_asymptotic(dat$x, dat$y, level = 0.95)
 
-  cca_ci_coverage_possibilities(fm_true, cis)
-
-  cca_ci_coverage_pangloss(fm_true, cis)
-
-  cca_ci_coverage_signflip(fm_true, cis)
+  expect_error(cca_metric_standard(fm_true, cis), NA)
 
 
 })
+
