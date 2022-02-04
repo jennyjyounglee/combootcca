@@ -53,7 +53,8 @@ covariance matrices of X and Y (although since these are identity matrices
 at the moment, this last step has no effect).
 
 Note: For now, the rotations are actually hard-coded to be identity matrices
-to make the problem very sparse.
+to make the problem very sparse. Also, all canonical correlations except for
+the first (rho_max) are set to 0.
 }
 \author{
 Dan Kessler

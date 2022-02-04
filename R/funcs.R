@@ -737,7 +737,8 @@ gen_data <- function(Sigma, p, q, n) {
 ##' at the moment, this last step has no effect).
 ##'
 ##' Note: For now, the rotations are actually hard-coded to be identity matrices
-##' to make the problem very sparse.
+##' to make the problem very sparse. Also, all canonical correlations except for
+##' the first (rho_max) are set to 0.
 ##' @title Generate random covariance matrix for CCA
 ##' @param p Dimension of X random variable
 ##' @param q Dimension of Y random variable
@@ -770,6 +771,7 @@ gen_sigma <- function(p, q, rho_max = 0.9, rho_gap = 0.1, rho_decay = 1) {
   rho <- rep(0, K)
   rho[1] <- rho_max
   rho[2:K] <- (rho_max - rho_gap)^(rho_decay * (2:K - 1))
+  rho[2:K] <- 0
   s <- matrix(0, q, p)
   diag(s) <- rho
 
