@@ -214,7 +214,7 @@ cca_ci_asymptotic <- function(x, y, level = .90,
   n <- nrow(x)
   p <- ncol(x)
   q <- ncol(y)
-  K <- min(p, q)
+  K <- min(p, q, n)
 
   fm <- cancor_scaled(x, y)
   fm <- align(fm, ref)
@@ -593,7 +593,7 @@ sim.coverage.check <- function(n, px, py) {
 ##' @author Dan Kessler
 coverage_experiment <- function(outreps = 1L, inreps = 1L, p = 2, q = 2,
                                 n = 1000L, nboots = 1000L) {
-  K <- min(p, q)
+  K <- min(p, q, n)
   coord_names <- c(paste0("X_", 1:p), paste0("Y_", 1:q))
 
   methods <- c(
