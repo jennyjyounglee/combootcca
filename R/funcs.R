@@ -749,10 +749,12 @@ gen_data <- function(Sigma, p, q, n) {
 ##'   first) decay. Should be a strictly positive number. Small values will give
 ##'   very gradual decay and poor spacing, very large values will asymptote at 0
 ##'   very quickly and also give poor spacing. See details for more information.
+##' @param random_rotation Should the CCA directions be randomly rotated?
 ##' @return A square, positive definite matrix with p+q rows/cols
 ##' @author Dan Kessler
 ##' @export
-gen_sigma <- function(p, q, rho_max = 0.9, rho_gap = 0.1, rho_decay = 1) {
+gen_sigma <- function(p, q, rho_max = 0.9, rho_gap = 0.1, rho_decay = 1,
+                      random_rotation = FALSE) {
   K <- min(p, q)
 
   sxx <- diag(p)
@@ -761,12 +763,13 @@ gen_sigma <- function(p, q, rho_max = 0.9, rho_gap = 0.1, rho_decay = 1) {
   sxx_sqrt <- expm::sqrtm(sxx)
   syy_sqrt <- expm::sqrtm(syy)
 
-  qx <- randortho_fixed(p)
-  qy <- randortho_fixed(q)
-
-  ## use identity rotations for now
-  qx <- diag(p)
-  qy <- diag(q)
+  if (random_rotation) {
+    qx <- randortho_fixed(p)
+    qy <- randortho_fixed(q)
+  } else {
+    qx <- diag(p)
+    qy <- diag(q)
+  }
 
   rho <- rep(0, K)
   rho[1] <- rho_max
