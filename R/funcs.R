@@ -536,8 +536,6 @@ cca_ci_boot <- function(x, y, level=0.90, align = cca_align_posdiag,
     ci_bca = ci_glue(ci_bca_flat)
   )
 
-  res <- ci_glue(ci_perc_flat) #hack to use percentiles for now
-
   return(res)
 }
 
@@ -1023,7 +1021,7 @@ bt_algo_boot <- function(job, data, instance, ...) {
   res_inreps <- lapply(instance$inreps, bt_algo_inrep,
     ci_func = cca_ci_boot,
     align = cca_align_greedy_cosy,
-    met_func = cca_metric_standard,
+    met_func = cca_metric_boots,
     fm_true = instance$fm_true,
     ...
   )
@@ -1236,6 +1234,16 @@ cca_metric_standard <- function(fm_true, cis, ...) {
   sigdet <- cca_ci_sigdet(fm_true, cis)
   res <- rbind(covs, lengths, sigdet)
   return(res)
+}
+
+cca_metric_boots <- function(fm_true, cis_list, ...) {
+  ## special handler to loop over multiple cis from boot
+
+  names(cis_list)
+  res_list <- lapply(cis_list, cca_metric_standard, fm_true = fm_true)
+  res <- data.table::rbindlist(res_list, idcol = "BootMethod")
+  return(res)
+
 }
 
 cca_ci_coverage_raw <- function(fm_true, cis) {
