@@ -530,10 +530,10 @@ cca_ci_boot <- function(x, y, level=0.90, align = cca_align_posdiag,
   }
 
   res <- list(
-    ci_norm = ci_glue(ci_norm_flat),
-    ci_basic = ci_glue(ci_basic_flat),
-    ci_perc = ci_glue(ci_perc_flat),
-    ci_bca = ci_glue(ci_bca_flat)
+    norm = ci_glue(ci_norm_flat),
+    basic = ci_glue(ci_basic_flat),
+    perc = ci_glue(ci_perc_flat),
+    bca = ci_glue(ci_bca_flat)
   )
 
   return(res)
