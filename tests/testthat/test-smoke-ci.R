@@ -11,6 +11,7 @@ test_that("All methods for CCA confidence intervals run without errors", {
   expect_error(cca_ci_absboot(x, y, parametric = FALSE), NA)
   expect_error(cca_ci_absboot(x, y, parametric = TRUE), NA)
   suppressWarnings(expect_error(cca_ci_boot(x, y), NA))
+  suppressWarnings(expect_error(cca_ci_boot(x, y, ncpus = 5), NA)) # test multicore support
 })
 
 test_that("Standard Metrics Work", {

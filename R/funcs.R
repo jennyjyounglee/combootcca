@@ -459,10 +459,12 @@ cca_ci_regression <- function(x, y, level = .90, align = cca_align_posdiag, ref,
 ##' @param align Function for alignment
 ##' @param ref Passed through to align function
 ##' @param nboots How many bootstrap replicates
+##' @param ncpus How many cpu's to use to parallelize bootstrap. If > 1, then
+##'   "multicore" will be used
 ##' @return List of several types of CIs
 ##' @author Dan Kessler
 cca_ci_boot <- function(x, y, level=0.90, align = cca_align_posdiag,
-                        ref, nboots = 1e2) {
+                        ref, nboots = 1e2, ncpus = 1) {
   n <- nrow(x)
   p <- ncol(x)
   q <- ncol(y)
@@ -476,12 +478,20 @@ cca_ci_boot <- function(x, y, level=0.90, align = cca_align_posdiag,
     return(theta)
   }
 
+  if (ncpus > 1) {
+    parallel <- "multicore"
+  } else {
+    parallel <- "no"
+  }
+
   boot_out <- boot::boot(data_flat,
     R = nboots,
     statistic = boot_stat,
     p = p,
     align = align,
-    ref = ref
+    ref = ref,
+    parallel = parallel,
+    ncpus = ncpus
   )
 
   ## preallocate for results
