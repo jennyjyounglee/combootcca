@@ -21,7 +21,10 @@ Imports:
     abind,
     RcppHungarian,
     data.table,
-    pracma
+    pracma,
+    RCCA
 Suggests: 
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
+Remotes:
+    ElenaTuzhilina/RCCA
