@@ -11,6 +11,7 @@ test_that("All methods for CCA confidence intervals run without errors", {
   expect_error(cca_ci_absboot(x, y, parametric = FALSE), NA)
   expect_error(cca_ci_absboot(x, y, parametric = TRUE), NA)
   suppressWarnings(expect_error(cca_ci_boot(x, y), NA))
+  expect_error(cca_ci_boot(x, y, boot_type = c("norm", "basic", "perc")), NA) # use a subset of boot_types
   suppressWarnings(expect_error(cca_ci_boot(x, y, ncpus = 5), NA)) # test multicore support
 })
 

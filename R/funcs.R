@@ -461,10 +461,13 @@ cca_ci_regression <- function(x, y, level = .90, align = cca_align_posdiag, ref,
 ##' @param nboots How many bootstrap replicates
 ##' @param ncpus How many cpu's to use to parallelize bootstrap. If > 1, then
 ##'   "multicore" will be used
+##' @param boot_type Which bootstrap methods to use; see type argument of
+##'   boot::boot.ci
 ##' @return List of several types of CIs
 ##' @author Dan Kessler
 cca_ci_boot <- function(x, y, level=0.90, align = cca_align_posdiag,
-                        ref, nboots = 1e2, ncpus = 1) {
+                        ref, nboots = 1e2, ncpus = 1,
+                        boot_type = c("norm", "basic", "perc", "bca")) {
   n <- nrow(x)
   p <- ncol(x)
   q <- ncol(y)
@@ -496,26 +499,6 @@ cca_ci_boot <- function(x, y, level=0.90, align = cca_align_posdiag,
 
   ## preallocate for results
   numel <- (p + q) * k
-  ci_norm_flat <- array(NA, c(numel, 2))
-  ci_basic_flat <- array(NA, c(numel, 2))
-  ci_perc_flat <- array(NA, c(numel, 2))
-  ci_bca_flat <- array(NA, c(numel, 2))
-
-
-  ## loop over theta to get confidence intervals
-  for (i in seq_len(numel)) {
-    bootci <- boot::boot.ci(
-      boot.out = boot_out,
-      conf = level,
-      type = c("norm", "basic", "perc", "bca"),
-      index = i
-    )
-
-    ci_norm_flat[i, ] <- bootci$normal[1, 2:3]
-    ci_basic_flat[i, ] <- bootci$basic[1, 4:5]
-    ci_perc_flat[i, ] <- bootci$percent[1, 4:5]
-    ci_bca_flat[i, ] <- bootci$bca[1, 4:5]
-  }
 
   ci_glue <- function(ci_flat) {
     alpha <- 1 - level
@@ -539,13 +522,29 @@ cca_ci_boot <- function(x, y, level=0.90, align = cca_align_posdiag,
     return(fm)
   }
 
-  res <- list(
-    norm = ci_glue(ci_norm_flat),
-    basic = ci_glue(ci_basic_flat),
-    perc = ci_glue(ci_perc_flat),
-    bca = ci_glue(ci_bca_flat)
-  )
+  ci_by_method <- function(method) {
+    ci_flat <- array(NA, c(numel, 2))
 
+    for (i in seq_len(numel)) {
+      bootci <- boot::boot.ci(
+        boot.out = boot_out,
+        conf = level,
+        type = method,
+        index = i
+      )
+
+      method_cis <- bootci[[method, exact = FALSE]] # extract the object
+      method_cis <- method_cis[
+        ,
+        (ncol(method_cis) - 1):ncol(method_cis)
+      ] # last 2 columns
+
+      ci_flat[i, ] <- method_cis
+    }
+    return(ci_glue(ci_flat))
+  }
+
+  res <- lapply(boot_type, ci_by_method) # loop over requested boot methods
   return(res)
 }
 
