@@ -545,6 +545,7 @@ cca_ci_boot <- function(x, y, level=0.90, align = cca_align_posdiag,
   }
 
   res <- lapply(boot_type, ci_by_method) # loop over requested boot methods
+  names(res) <- boot_type                # preserve method names
   return(res)
 }
 
