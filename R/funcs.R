@@ -903,38 +903,50 @@ cancor_vec <- function(data, p, align, ref) {
 ##' @title Batchtools convenience function for "problem"
 ##' @param job Constructed by batchtools
 ##' @param data Optionally, pass a list with named elements `x` and `y`, where
-##'   each is an n by p and n by q matrix, respectively
-##' @param sigma Optional: a square covariance matrix of dimension (p + q)
+##'   each is an n by p and n by q matrix, respectively. Or, if `sigma` is true,
+##'   then pass a single square covariance matrix of dimension (p + q)
 ##' @param p The dimension of the random variable X
 ##' @param q The dimension of the random variable Y
 ##' @param n The number of observations
 ##' @param inreps How many replicates to draw
 ##' @param ... Additional arguments passed to gen_sigma
+##' @param data_is_sigma If true, treat "data" as sigma: a square covariance
+##'   matrix of dimension (p + q)
 ##' @return An instance
 ##' @author Daniel Kessler
 ##' @export
-bt_problem_std_fun <- function(job = NULL, data = NULL, sigma = NULL, p = NULL,
-                               q = NULL, n = NULL, inreps = 1L, ...) {
-  prob_fun_inner <- function(data = NULL) {
+bt_problem_std_fun <- function(job = NULL, data = NULL, data_is_sigma = FALSE,
+                               p = NULL, q = NULL, n = NULL, inreps = 1L, ...) {
+
+  prob_fun_inner <- function(use_data = FALSE) {
     res <- list()
-    if (!is.null(data)) res$data <- data
-    if (is.null(data)) res$data <- gen_data(sigma, p, q, n)
+    if (use_data) res$data <- data # use data
+    if (!use_data) res$data <- gen_data(sigma, p, q, n) # make data
     res$fm_hat <- cancor_scaled(res$data$x, res$data$y)
     return(res)
   }
 
+  ## initialize
   instance <- list()
   instance$inreps <- list()
 
-  if (!is.null(data)) instance$inreps[1] <- prob_fun_inner(data = data)
+  if (!is.null(data) & !data_is_sigma) { # use the data as passed
+    instance$inreps[1] <- prob_fun_inner(use_data = FALSE)
+  }
 
-  if (is.null(data)) {
-    if (is.null(sigma)) sigma <- gen_sigma(p, q, ...)
+  if (!is.null(data) & data_is_sigma) { # sigma passed as data
+    sigma <- data
     instance$inreps <- replicate(inreps, prob_fun_inner(), simplify = FALSE)
   }
 
-  instance$sigma <- sigma
-  if (!is.null(sigma)) instance$fm_true <- cancor_cov(sigma, p)
+  if (is.null(data)) { # do it from scratch
+    sigma <- gen_sigma(p, q, ...)
+    instance$inreps <- replicate(inreps, prob_fun_inner(), simplify = FALSE)
+  }
+
+  if (data_is_sigma | is.null(data)) { # if we have ground truth, record it
+    instance$fm_true <- cancor_cov(sigma, p)
+  }
 
   return(instance)
 }
