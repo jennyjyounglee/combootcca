@@ -465,6 +465,7 @@ cca_ci_regression <- function(x, y, level = .90, align = cca_align_posdiag, ref,
 ##'   boot::boot.ci
 ##' @return List of several types of CIs
 ##' @author Dan Kessler
+##' @export
 cca_ci_boot <- function(x, y, level=0.90, align = cca_align_posdiag,
                         ref, nboots = 1e2, ncpus = 1,
                         boot_type = c("norm", "basic", "perc", "bca")) {
