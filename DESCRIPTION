@@ -17,6 +17,7 @@ RoxygenNote: 7.1.2
 Imports: 
     clusterGeneration,
     expm,
+    boot,
     MASS,
     abind,
     RcppHungarian,
