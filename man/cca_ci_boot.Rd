@@ -4,7 +4,16 @@
 \alias{cca_ci_boot}
 \title{Bootstrap-based confidence intervals for CCA}
 \usage{
-cca_ci_boot(x, y, level = 0.9, align = cca_align_posdiag, ref, nboots = 100)
+cca_ci_boot(
+  x,
+  y,
+  level = 0.9,
+  align = cca_align_posdiag,
+  ref,
+  nboots = 100,
+  ncpus = 1,
+  boot_type = c("norm", "basic", "perc", "bca")
+)
 }
 \arguments{
 \item{x}{Data matrix of size n by p}
@@ -18,6 +27,12 @@ cca_ci_boot(x, y, level = 0.9, align = cca_align_posdiag, ref, nboots = 100)
 \item{ref}{Passed through to align function}
 
 \item{nboots}{How many bootstrap replicates}
+
+\item{ncpus}{How many cpu's to use to parallelize bootstrap. If > 1, then
+"multicore" will be used}
+
+\item{boot_type}{Which bootstrap methods to use; see type argument of
+boot::boot.ci}
 }
 \value{
 List of several types of CIs

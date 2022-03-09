@@ -7,7 +7,7 @@
 bt_problem_std_fun(
   job = NULL,
   data = NULL,
-  sigma = NULL,
+  data_is_sigma = FALSE,
   p = NULL,
   q = NULL,
   n = NULL,
@@ -19,9 +19,11 @@ bt_problem_std_fun(
 \item{job}{Constructed by batchtools}
 
 \item{data}{Optionally, pass a list with named elements \code{x} and \code{y}, where
-each is an n by p and n by q matrix, respectively}
+each is an n by p and n by q matrix, respectively. Or, if \code{sigma} is true,
+then pass a single square covariance matrix of dimension (p + q)}
 
-\item{sigma}{Optional: a square covariance matrix of dimension (p + q)}
+\item{data_is_sigma}{If true, treat "data" as sigma: a square covariance
+matrix of dimension (p + q)}
 
 \item{p}{The dimension of the random variable X}
 
