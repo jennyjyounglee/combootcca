@@ -261,13 +261,17 @@ cca_ci_asymptotic <- function(x, y, level = .90,
   alpha <- 1 - level
   ci_levels <- paste(c(100 * alpha / 2, 100 * (1 - alpha / 2)), "%")
 
-  xcoef_ci <- array(NA, c(p, K, 2),
-                    dimnames = list(NULL, NULL, ci_levels)
+  adimnames <- list(
+    coordinate = NULL,
+    component = 1:K,
+    ci_levels
   )
 
+  xcoef_ci <- array(NA, c(p, K, 2),
+                    dimnames = adimnames)
+
   ycoef_ci <- array(NA, c(q, K, 2),
-                    dimnames = list(NULL, NULL, ci_levels)
-  )
+                    dimnames = adimnames)
 
   xcoef_ci[, , 1] <- fm$xcoef - sqrt(xvar / n) * zcrit
   xcoef_ci[, , 2] <- fm$xcoef + sqrt(xvar / n) * zcrit
@@ -354,13 +358,17 @@ cca_ci_absboot <- function(x, y, level = .90, align = cca_align_posdiag, ref,
   alpha <- 1 - level
   ci_levels <- paste(c(100 * alpha / 2, 100 * (1 - alpha / 2)), "%")
 
-  xcoef_ci <- array(NA, c(p, K, 2),
-                    dimnames = list(NULL, NULL, ci_levels)
+  adimnames <- list(
+    coordinate = NULL,
+    component = 1:K,
+    ci_levels
   )
 
+  xcoef_ci <- array(NA, c(p, K, 2),
+                    dimnames = adimnames)
+
   ycoef_ci <- array(NA, c(q, K, 2),
-                    dimnames = list(NULL, NULL, ci_levels)
-  )
+                    dimnames = adimnames)
 
   xcoef_ci[, , 1] <- xcoef_hat - xcoef_t
   xcoef_ci[, , 2] <- xcoef_hat + xcoef_t
@@ -425,13 +433,17 @@ cca_ci_regression <- function(x, y, level = .90, align = cca_align_posdiag, ref,
   alpha <- 1 - level
   ci_levels <- paste(c(100 * alpha / 2, 100 * (1 - alpha / 2)), "%")
 
-  xcoef_ci <- array(NA, c(p, K, 2),
-                    dimnames = list(NULL, NULL, ci_levels)
+  adimnames <- list(
+    coordinate = NULL,
+    component = 1:K,
+    ci_levels
   )
 
+  xcoef_ci <- array(NA, c(p, K, 2),
+                    dimnames = adimnames)
+
   ycoef_ci <- array(NA, c(q, K, 2),
-                    dimnames = list(NULL, NULL, ci_levels)
-  )
+                    dimnames = adimnames)
 
   for (k in 1:K) {
     fm2_xpred <- lm_scalefix(lm(y2scores[, k] ~ x2))
