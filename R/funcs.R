@@ -484,7 +484,7 @@ cca_ci_boot <- function(x, y, level=0.90, align = cca_align_posdiag,
   n <- nrow(x)
   p <- ncol(x)
   q <- ncol(y)
-  k <- min(p, q, n)
+  K <- min(p, q, n)
 
   data_flat <- cbind(x, y)
 
@@ -511,14 +511,14 @@ cca_ci_boot <- function(x, y, level=0.90, align = cca_align_posdiag,
   )
 
   ## preallocate for results
-  numel <- (p + q) * k
+  numel <- (p + q) * K
 
   ci_glue <- function(ci_flat) {
     alpha <- 1 - level
     ci_levels <- paste0(c(100 * alpha / 2, 100 * (1 - alpha / 2)), "%")
     adimnames <- list(
       coordinate = NULL,
-      component = 1:k,
+      component = 1:K,
       ci_levels
     )
 
