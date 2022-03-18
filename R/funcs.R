@@ -7,6 +7,7 @@
 ##     fun is for function to be used in prob/algo definition, inner for inrep function
 
 
+## * Alignment Functions
 
 
 ##' Correct sign ambiguity in canonical correlation analysis by requiring that
@@ -143,6 +144,8 @@ cca_align_hungarian_weighted <- function(fm, ref) {
   return(fm)
 }
 
+## * Utility Functions
+
 ##' @title Compute cosine similarity between columns of two matrices
 ##' @param x Matrix of size n by p
 ##' @param y Matrix of size n by q
@@ -191,6 +194,8 @@ cancor_scaled <- function(x, y, xcenter = TRUE, ycenter = TRUE,
   fm <- align(fm, ref)
   return(fm)
 }
+
+## * CI Functions
 
 ##' Obtain confidence intervals for the "directions" of a canonical correlation
 ##' analysis using asymptotic results from Anderson 1999.
@@ -574,6 +579,8 @@ lm_scalefix <- function(fm) {
   fm_tilde <- lm(y_tilde ~ x)
   return(fm_tilde)
 }
+
+## * Simulation Support
 ## code to support simulation studies of CCA
 
 sim.coverage.check <- function(n, px, py) {
@@ -908,7 +915,8 @@ cancor_vec <- function(data, p, align, ref) {
   return(theta)
 }
 
-## batchtools functions below here
+
+## * Batchtools Interfaces
 
 ##' This is a convenience function for use with batchtools
 ##'
@@ -1065,6 +1073,7 @@ bt_algo_boot <- function(job, data, instance, ...) {
 }
 
 
+## * More utility functions
 fm2mat <- function(fm) rbind(fm$xcoef, fm$ycoef)
 
 fm2vec <- function(fm) mat2vec(fm2mat(fm))
@@ -1081,6 +1090,8 @@ mat2vec <- function(mat) c(mat)
 vec2fm <- function(vec, p, q) mat2fm(vec2mat(vec, p, q), p)
 
 vec2mat <- function(vec, p, q) matrix(vec, nrow = p + q)
+
+## * Assess Coverage
 
 ##' @title Compute the best possible coverage of CCA CIs (allowing both sign
 ##'   flips and reassignments)
