@@ -892,6 +892,79 @@ cancor_cov <- function(Sigma, px, align = cca_align_posdiag, ref) {
   return(fm)
 }
 
+##' Given canonical directions and correlations, find an associated covariance matrix
+##'
+##' In the same way that cancor_cov maps from a covariance matrix to a
+##' correspond CCA solution, it is possible to map from a CCA solution to a
+##' covariance matrix. However, this map is generally not unique.
+##'
+##' Given canonical correlations along with canonical directions for x and y,
+##' respectively, this function will return a covariance matrix Sigma such that
+##' calling cancor_cov on Sigma will return the same parameterization.
+##'
+##' Note that when p is not equal to q, there is ambiguity in the specification
+##' of the covariance matrix for the larger random vector. The current approach
+##' involves pseudoinverses, but these present difficulties for downstream
+##' matrix operations. As a fix, we "fortify" the otherwise rank-deficient
+##' matrices by increasing their trailing eigenvalues.
+##' @title Inverse Map from CCA to Covariance
+##' @param xcoef Canonical directions for the x variables (matrix)
+##' @param ycoef Canonical directions for the y variables (matrix)
+##' @param rho Canonical correlations (vector)
+##' @return A square covariance matrix of size p + q
+##' @author Dan Kessler
+cancor_inv_cov <- function(xcoef, ycoef, cor) {
+  K <- length(cor)
+  p <- nrow(xcoef)
+  q <- nrow(ycoef)
+
+
+  pxcoef <- pracma::pinv(xcoef)
+  pycoef <- pracma::pinv(ycoef)
+
+  sxx <- t(pxcoef) %*% pxcoef
+  syy <- t(pycoef) %*% pycoef
+
+  ## address epsilon-small trailing eigenvalues
+  if (p > K) {
+    sxx <- cov_fortify(sxx, K)
+  }
+  if (q > K) {
+    syy <- cov_fortify(syy, K)
+  }
+
+  rsxx <- expm::sqrtm(sxx)
+  rsyy <- expm::sqrtm(syy)
+
+  U <- rsyy %*% ycoef
+  V <- rsxx %*% xcoef
+  syx <- rsyy %*% U %*% diag(cor) %*% t(V) %*% rsxx
+
+  Sigma <- matrix(NA, p + q, p + q)
+  Sigma[1:p, 1:p] <- sxx
+  Sigma[(p+1):(p+q), (p+1):(p+q)] <- syy
+  Sigma[(p + 1):(p + q), 1:p] <- syx
+  Sigma[1:p, (p + 1):(p + q)] <- t(syx)
+  return(Sigma)
+}
+##' Fortify a covariance matrix by growing all eigenvalues past the K'th
+##'
+##' Some of our procedures may produce a covariance matrix that is very nearly
+##' rank deficient, i.e., eigenvalues past the K'th may be arbitrarily small. This function will attempt to remedy this by replacing all eigenvalues after the K'th with new values that are sorted uniforms drawn with support between 0 and the K'th eigenvalue
+##' @title Fortify a covariance matrix
+##' @param cov
+##' @return Fortified covariance matrix
+##' @author Dan Kessler
+cov_fortify <- function(cov, K){
+  p <- nrow(cov)
+  eigs <- eigen(cov)
+  lmax <- eigs$values[K]
+  lnew <- sort(runif(p - K, min = 0, max = lmax))
+  eigs$values[(K+1):p] <- lnew
+
+  cov_new <- with(eigs, vectors %*% diag(values) %*% t(vectors))
+}
+
 ##' Return the (signed) value of the maximum (in magnitude) element of a vector
 ##'
 ##' An example is especially illustrative. absmax(c(1,-3,2)) will
