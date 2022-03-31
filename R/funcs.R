@@ -602,8 +602,37 @@ cca_ci_boot <- function(x, y, level=0.90, align = cca_align_posdiag,
     return(c(ci_glue(ci_flat), p_glue(p_flat)))
   }
 
+  cca_ci_absboot_boot <- function() {
+    ## make absboot style CI's using boot_out
+    abs_devs <- abs(sweep(boot_out$t, c(2), boot_out$t0))
+    abs_t <- apply(abs_devs, 2, quantile, probs = level)
+
+    ci_lower <- vec2fm(boot_out$t0 - abs_t, p, q)
+    ci_upper <- vec2fm(boot_out$t0 + abs_t, p, q)
+
+    alpha <- 1 - level
+    ci_levels <- paste0(c(100 * alpha / 2, 100 * (1 - alpha / 2)), "%")
+    adimnames <- list(
+      coordinate = NULL,
+      component = 1:K,
+      ci_levels
+    )
+
+    xcoef_ci <- abind::abind(ci_lower$xcoef, ci_upper$xcoef, along = 3)
+    dimnames(xcoef_ci) <- adimnames
+
+    ycoef_ci <- abind::abind(ci_lower$ycoef, ci_upper$ycoef, along = 3)
+    dimnames(ycoef_ci) <- adimnames
+
+    fm <- list(xcoef = xcoef_ci, ycoef = ycoef_ci)
+    return(fm)
+  }
+
   res <- lapply(boot_type, ci_by_method) # loop over requested boot methods
-  names(res) <- boot_type                # preserve method names
+
+  res$ci_absboot <- cca_ci_absboot_boot() # get absboot results
+
+  names(res) <- c(boot_type, "AbsBoot")                # preserve method names
   return(res)
 }
 
