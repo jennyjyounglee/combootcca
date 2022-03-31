@@ -46,10 +46,11 @@ cca_align_posdiag <- function(fm, ref) {
 ##' the first K=min(px,py) components.
 ##' @title Fix cancor signs based on the max entry in each column
 ##' @param fm A fitted object returned by cancor
+##' @param ref Not used
 ##' @return Same object as returned by cancor after sign-flipping per
 ##'     the identifiability condition discussed in Details.
 ##' @author Daniel Kessler
-cca_align_posmax <- function(fm) {
+cca_align_posmax <- function(fm, ref) {
   k <- length(fm$cor)
 
   theta <- rbind(fm$xcoef[, 1:k, drop = FALSE], fm$ycoef[, 1:k, drop = FALSE])
