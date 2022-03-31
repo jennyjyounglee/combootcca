@@ -144,6 +144,16 @@ cca_align_hungarian_weighted <- function(fm, ref) {
   return(fm)
 }
 
+parse_align <- function(align) {
+  if (is.function(align)) {
+    return(align)
+  }
+  if (is.character(align)) {
+    align <- get(align)
+    return(align)
+  }
+}
+
 ## * Utility Functions
 
 ##' @title Compute cosine similarity between columns of two matrices
@@ -209,13 +219,15 @@ cancor_scaled <- function(x, y, xcenter = TRUE, ycenter = TRUE,
 ##'   coefficients to render the solution well-identified. By default, this uses
 ##'   cancor_signfix_diag, which ensures that the diagonal of xcoef is
 ##'   non-negative. Should also take "ref" or "..." as an argument (but doesn't
-##'   have to use it).
+##'   have to use it). If a string is passed, it will be converted to the
+##'   function with the same name.
 ##' @param ref A reference solution to align against
 ##' @return List with two objects: xcoef and ycoef.
 ##' @author Dan Kessler
 ##' @export
 cca_ci_asymptotic <- function(x, y, level = .90,
                               align = cca_align_posdiag, ref) {
+  align <- parse_align(align)
   n <- nrow(x)
   p <- ncol(x)
   q <- ncol(y)
@@ -307,6 +319,7 @@ cca_ci_asymptotic <- function(x, y, level = .90,
 ##' @export
 cca_ci_absboot <- function(x, y, level = .90, align = cca_align_posdiag, ref,
                              nboots = 1e3, parametric = FALSE, progress = 0) {
+  align <- parse_align(align)
   n <- nrow(x)
   p <- ncol(x)
   q <- ncol(y)
@@ -416,6 +429,7 @@ cca_ci_absboot <- function(x, y, level = .90, align = cca_align_posdiag, ref,
 ##' @export
 cca_ci_regression <- function(x, y, level = .90, align = cca_align_posdiag, ref,
                               train_ratio = 0.5) {
+  align <- parse_align(align)
   n <- nrow(x)
   p <- ncol(x)
   q <- ncol(y)
@@ -486,6 +500,7 @@ cca_ci_regression <- function(x, y, level = .90, align = cca_align_posdiag, ref,
 cca_ci_boot <- function(x, y, level=0.90, align = cca_align_posdiag,
                         ref, nboots = 1e2, ncpus = 1,
                         boot_type = c("norm", "basic", "perc", "bca")) {
+  align <- parse_align(align)
   n <- nrow(x)
   p <- ncol(x)
   q <- ncol(y)
@@ -1101,7 +1116,6 @@ bt_algo_inrep <- function(inrep, ci_func, met_func, fm_true, ...) {
 bt_algo_asymptotic <- function(job, data, instance, ...) {
   res_inreps <- lapply(instance$inreps, bt_algo_inrep,
     ci_func = cca_ci_asymptotic,
-    align = cca_align_greedy_cosy,
     met_func = cca_metric_standard,
     fm_true = instance$fm_true,
     ...
@@ -1121,7 +1135,6 @@ bt_algo_asymptotic <- function(job, data, instance, ...) {
 bt_algo_absboot <- function(job, data, instance, ...) {
   res_inreps <- lapply(instance$inreps, bt_algo_inrep,
     ci_func = cca_ci_absboot,
-    align = cca_align_greedy_cosy,
     met_func = cca_metric_standard,
     fm_true = instance$fm_true,
     ...
@@ -1141,7 +1154,6 @@ bt_algo_absboot <- function(job, data, instance, ...) {
 bt_algo_regression <- function(job, data, instance, ...) {
   res_inreps <- lapply(instance$inreps, bt_algo_inrep,
     ci_func = cca_ci_regression,
-    align = cca_align_greedy_cosy,
     met_func = cca_metric_standard,
     fm_true = instance$fm_true,
     ...
@@ -1161,7 +1173,6 @@ bt_algo_regression <- function(job, data, instance, ...) {
 bt_algo_boot <- function(job, data, instance, ...) {
   res_inreps <- lapply(instance$inreps, bt_algo_inrep,
     ci_func = cca_ci_boot,
-    align = cca_align_greedy_cosy,
     met_func = cca_metric_boots,
     fm_true = instance$fm_true,
     ...
