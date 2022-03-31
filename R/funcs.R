@@ -963,7 +963,7 @@ cancor_inv_cov <- function(xcoef, ycoef, cor) {
 
   U <- rsyy %*% ycoef
   V <- rsxx %*% xcoef
-  syx <- rsyy %*% U %*% diag(cor) %*% t(V) %*% rsxx
+  syx <- rsyy %*% U %*% diag(cor, nrow = K, ncol = K) %*% t(V) %*% rsxx
 
   Sigma <- matrix(NA, p + q, p + q)
   Sigma[1:p, 1:p] <- sxx
