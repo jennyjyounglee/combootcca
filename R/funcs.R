@@ -540,7 +540,26 @@ cca_ci_boot <- function(x, y, level=0.90, align = cca_align_posdiag,
     return(fm)
   }
 
+  p_glue <- function(p_flat) {
+    adimnames <- list(
+      coordiante = NULL,
+      component = 1:K
+    )
+
+    p <- vec2fm(p_flat, p, q)
+
+    xcoef_p <- p$xcoef
+    dimnames(xcoef_p) <- adimnames
+
+    ycoef_p <- p$ycoef
+    dimnames(ycoef_p) <- adimnames
+
+    fm <- list(xcoef_p = xcoef_p, ycoef_p = ycoef_p)
+    return(fm)
+  }
+
   ci_by_method <- function(method) {
+    p_flat <- array(NA, numel)
     ci_flat <- array(NA, c(numel, 2))
 
     for (i in seq_len(numel)) {
@@ -557,9 +576,14 @@ cca_ci_boot <- function(x, y, level=0.90, align = cca_align_posdiag,
         (ncol(method_cis) - 1):ncol(method_cis)
       ] # last 2 columns
 
+      p_flat[i] <- boot.pval::boot.pval(
+                                boot_res = boot_out,
+                                type = method,
+                                theta_null = 0,
+                                index = i)
       ci_flat[i, ] <- method_cis
     }
-    return(ci_glue(ci_flat))
+    return(c(ci_glue(ci_flat), p_glue(p_flat)))
   }
 
   res <- lapply(boot_type, ci_by_method) # loop over requested boot methods
