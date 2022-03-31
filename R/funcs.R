@@ -8,7 +8,17 @@
 
 
 ## * Alignment Functions
-
+##' Align CCA solutions by doing nothing.
+##'
+##' .. content for \details{} ..
+##' @title Non-functional CCA alignment
+##' @param fm 
+##' @param ref 
+##' @return 
+##' @author Dan Kessler
+cca_align_nil <- function(fm, ref) {
+  return(fm)
+}
 
 ##' Correct sign ambiguity in canonical correlation analysis by requiring that
 ##' the diagonal of xcoef be non-negative (this is the approach suggested by
