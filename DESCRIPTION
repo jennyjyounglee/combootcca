@@ -18,7 +18,6 @@ Imports:
     clusterGeneration,
     expm,
     boot,
-    boot.pval,
     MASS,
     abind,
     RcppHungarian,
