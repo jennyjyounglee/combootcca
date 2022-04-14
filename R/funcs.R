@@ -100,6 +100,30 @@ cca_align_greedy_cosx <- function(fm, ref) {
   return(fm)
 }
 
+cca_align_signflip <- function(fm, ref) {
+  k <- length(fm$cor)
+
+  theta_hat <- rbind(
+    fm$xcoef[, 1:k, drop = FALSE],
+    fm$ycoef[, 1:k, drop = FALSE]
+  )
+
+  theta_ref <- rbind(
+    ref$xcoef[, 1:k, drop = FALSE],
+    ref$ycoef[, 1:k, drop = FALSE]
+  )
+
+  sim_sign <- sign(cos_sim(theta_ref, theta_hat))
+
+  signs <- diag(sim_sign)
+
+
+  fm$xcoef <- fm$xcoef %*% diag(signs)
+  fm$ycoef <- fm$ycoef %*% diag(signs)
+
+  return(fm)
+}
+
 cca_align_greedy_cosy <- function(fm, ref) {
   t_hat <- fm$ycoef
   t_ref <- ref$ycoef

@@ -35,3 +35,24 @@ test_that("Generalized Hungarian Algorithm Works: Wide", {
 
   expect_equal(hungarian_max_signflip(C), P)
 })
+
+test_that("Signflip Works", {
+  fm <- list()
+  fm$cor <- c(0.9, 0.5, 0.1)
+  fm$xcoef <- matrix(c(0.9, 0.1, 0, -0.9, 0, 0, .5, 0, -1.5), 3, 3)
+  fm$ycoef <- diag(3)
+
+  ref <- list()
+  ref$xcoef <- diag(3)
+  ref$ycoef <- diag(3)
+
+  signs <- c(1, 1, -1)
+
+  fm_aligned <- fm
+  fm_aligned$xcoef <- fm$xcoef %*% diag(signs)
+  fm_aligned$ycoef <- fm$ycoef %*% diag(signs)
+
+  expect_equal(cca_align_signflip(fm, ref), fm_aligned)
+
+
+})
