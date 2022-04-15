@@ -34,7 +34,7 @@ cca_align_posdiag <- function(fm, ref) {
   k <- length(fm$cor)
   fm$xcoef <- fm$xcoef[, 1:k, drop = FALSE]
   fm$ycoef <- fm$ycoef[, 1:k, drop = FALSE]
-  signs <- diag(x = sign(diag(fm$xcoef)), nrow = k, ncol = k)
+  signs <- diag(x = nonneg(diag(fm$xcoef)), nrow = k, ncol = k)
   fm$xcoef <- fm$xcoef %*% signs
   fm$ycoef <- fm$ycoef %*% signs
   return(fm)
@@ -67,7 +67,7 @@ cca_align_posmax <- function(fm, ref) {
 
   maxes <- apply(theta, 2, absmax)
 
-  flip <- diag(x = sign(maxes), nrow = k, ncol = k)
+  flip <- diag(x = nonneg(maxes), nrow = k, ncol = k)
 
   fm$xcoef[, 1:k] <- fm$xcoef[, 1:k] %*% flip
   fm$ycoef[, 1:k] <- fm$ycoef[, 1:k] %*% flip
@@ -82,7 +82,7 @@ cca_align_greedy_cosx <- function(fm, ref) {
   sim <- cos_sim(t_ref, t_hat)
 
   ## decompose into signed similarity
-  sim_sign <- sign(sim)
+  sim_sign <- nonneg(sim)
   sim_abs <- abs(sim)
 
   k <- ncol(t_ref)
@@ -113,7 +113,7 @@ cca_align_signflip <- function(fm, ref) {
     ref$ycoef[, 1:k, drop = FALSE]
   )
 
-  sim_sign <- sign(cos_sim(theta_ref, theta_hat))
+  sim_sign <- nonneg(cos_sim(theta_ref, theta_hat))
 
   signs <- diag(sim_sign)
 
@@ -131,7 +131,7 @@ cca_align_greedy_cosy <- function(fm, ref) {
   sim <- cos_sim(t_ref, t_hat)
 
   ## decompose into signed similarity
-  sim_sign <- sign(sim)
+  sim_sign <- nonneg(sim)
   sim_abs <- abs(sim)
 
   k <- ncol(t_ref)
@@ -1240,6 +1240,13 @@ vec2fm <- function(vec, p, q) mat2fm(vec2mat(vec, p, q), p)
 
 vec2mat <- function(vec, p, q) matrix(vec, nrow = p + q)
 
+## Like sign, but return +1 for 0
+nonneg <- function(x) {
+  signs <- sign(x)
+  signs[signs == 0] <- 1
+  return(signs)
+}
+
 ## * Assess Coverage
 
 ##' @title Compute the best possible coverage of CCA CIs (allowing both sign
@@ -1413,7 +1420,7 @@ hungarian_max_signflip <- function(C) {
   P_star <- matrix(0, k2, k2)
   P_star[sol_abs$pairs] <- 1
 
-  signs <- c(diag(sign(C %*% P_star)), rep(0, k2 - k1))
+  signs <- c(diag(nonneg(C %*% P_star)), rep(0, k2 - k1))
 
   D_star <- diag(signs)
 
