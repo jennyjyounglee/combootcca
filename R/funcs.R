@@ -1247,6 +1247,26 @@ nonneg <- function(x) {
   return(signs)
 }
 
+## threshold a cancor object, setting any values smaller than thresh in
+## magnitude to 0. if any canonical correlations are smaller than thresh,
+## zero-out their associated directions
+cancor_thresh <- function(fm, thresh = 1e-10) { #
+  K <- length(fm$cor)
+
+  cor_mask <- abs(fm$cor) >= thresh
+  fm$cor[cor_mask] <- 0
+
+  cor_mask_mat <- diag(x = cor_mask, nrow = K, ncol = K)
+
+  fm$xcoef <- fm$xcoef %*% cor_mask_mat
+  fm$ycoef <- fm$ycoef %*% cor_mask_mat
+
+  fm$xcoef[abs(fm$xcoef) < thresh] <- 0
+  fm$ycoef[abs(fm$ycoef) < thresh] <- 0
+
+  return(fm)
+}
+
 ## * Assess Coverage
 
 ##' @title Compute the best possible coverage of CCA CIs (allowing both sign
@@ -1476,6 +1496,8 @@ cca_ci_coverage_raw1 <- function(true_coef, cis_coef) {
 }
 
 cca_ci_sigdet <- function(fm_true, cis) {
+  fm_true <- cancor_thresh(fm_true)
+
   sigdets <- list()
   sigdets$x <- cca_ci_sigdet1(fm_true$xcoef, cis$xcoef)
   sigdets$y <- cca_ci_sigdet1(fm_true$ycoef, cis$ycoef)
