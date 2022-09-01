@@ -1,7 +1,7 @@
 test_that("Greedy Cosine Similarity Alignment Works", {
   fm <- list()
   fm$xcoef <- matrix(c(0.9, 0.1, 0, -1, 0, 0, .5, 0, .5), 3, 3)
-  fm$ycoef <- diag(3)
+  fm$ycoef <- fm$xcoef
 
   ref <- list()
   ref$xcoef <- diag(3)
@@ -13,7 +13,7 @@ test_that("Greedy Cosine Similarity Alignment Works", {
   fm_aligned$xcoef <- fm$xcoef[, map] %*% diag(signs)
   fm_aligned$ycoef <- fm$ycoef[, map] %*% diag(signs)
 
-  expect_equal(cca_align_greedy_cosx(fm, ref), fm_aligned)
+  expect_equal(cca_align_greedy(fm, ref), fm_aligned)
 })
 
 

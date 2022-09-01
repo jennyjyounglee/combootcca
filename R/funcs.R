@@ -75,31 +75,6 @@ cca_align_posmax <- function(fm, ref) {
   return(fm)
 }
 
-cca_align_greedy_cosx <- function(fm, ref) {
-  t_hat <- fm$xcoef
-  t_ref <- ref$xcoef
-
-  sim <- cos_sim(t_ref, t_hat)
-
-  ## decompose into signed similarity
-  sim_sign <- nonneg(sim)
-  sim_abs <- abs(sim)
-
-  k <- ncol(t_ref)
-  map <- rep(0, k)
-  signs <- rep(0, k)
-  for (i in 1:k) {
-    map[i] <- which.max(sim_abs[i, ])
-    signs[i] <- sim_sign[i, map[i]]
-    sim_abs[, map[i]] <- 0 # zero-out the selected column
-  }
-
-  fm$xcoef <- fm$xcoef[, map] %*% diag(signs)
-  fm$ycoef <- fm$ycoef[, map] %*% diag(signs)
-
-  return(fm)
-}
-
 cca_align_signflip <- function(fm, ref) {
   k <- length(fm$cor)
 
@@ -124,17 +99,14 @@ cca_align_signflip <- function(fm, ref) {
   return(fm)
 }
 
-cca_align_greedy_cosy <- function(fm, ref) {
-  t_hat <- fm$ycoef
-  t_ref <- ref$ycoef
-
-  sim <- cos_sim(t_ref, t_hat)
+cca_align_greedy <- function(fm, ref) {
+  sim <- cca_cos_sim(fm, ref)
 
   ## decompose into signed similarity
   sim_sign <- nonneg(sim)
   sim_abs <- abs(sim)
 
-  k <- ncol(t_ref)
+  k <- ncol(sim)
   map <- rep(0, k)
   signs <- rep(0, k)
   for (i in 1:k) {
@@ -150,10 +122,7 @@ cca_align_greedy_cosy <- function(fm, ref) {
 }
 
 cca_align_hungarian <- function(fm, ref) {
-  sim_x <- cos_sim(ref$xcoef, fm$xcoef)
-  sim_y <- cos_sim(ref$ycoef, fm$ycoef)
-
-  sim <- apply(abind::abind(sim_x, sim_y, along = 3), c(1, 2), mean)
+  sim <- cca_cos_sim(fm, ref)
 
   P <- hungarian_max_signflip(sim)
 
@@ -163,13 +132,11 @@ cca_align_hungarian <- function(fm, ref) {
   return(fm)
 }
 
+## weight by square roots of reference and fitted canonical correlations
 cca_align_hungarian_weighted <- function(fm, ref) {
-  sim_x <- cos_sim(ref$xcoef, fm$xcoef)
-  sim_y <- cos_sim(ref$ycoef, fm$ycoef)
+  sim <- cca_cos_sim(fm, ref)
 
-  sim <- apply(abind::abind(sim_x, sim_y, along = 3), c(1, 2), mean)
-
-  sim_weighted <- diag(ref$cor) %*% sim
+  sim_weighted <- diag(sqrt(ref$cor)) %*% sim %*% diag(sqrt(fm$cor))
 
   P <- hungarian_max_signflip(sim_weighted)
 
@@ -197,6 +164,9 @@ parse_align <- function(align) {
 ##' @return Matrix of size p by q of cosine similarities. The (i, j) entry has
 ##'   the similarity between x_i and y_j.
 ##' @author Daniel Kessler
+##'
+##' Note that the cosine similarity is not well-defined when there exists a
+##' column of all 0's in either x or y.
 cos_sim <- function(x, y) {
   x <- scale(x, center = FALSE, scale = sqrt(colSums(x^2)))
   y <- scale(y, center = FALSE, scale = sqrt(colSums(y^2)))
@@ -204,8 +174,28 @@ cos_sim <- function(x, y) {
   return(t(x) %*% y)
 }
 
-##' Compute the canonical correlations between two data matrices such that
-##' canonical variates have unit variance.
+cca_cos_sim <- function(fm, ref) {
+
+  if (!is.null(fm$xsd)) {
+    fm$xcoef <- sweep(fm$xcoef, 1, fm$xsd, FUN = '/')
+  }
+  if (!is.null(fm$ysd)) {
+    fm$ycoef <- sweep(fm$ycoef, 1, fm$ysd, FUN = "/")
+  }
+  if (!is.null(ref$xsd)) {
+    ref$xcoef <- sweep(ref$xcoef, 1, ref$xsd, FUN = "/")
+  }
+  if (!is.null(ref$ysd)) {
+    ref$ycoef <- sweep(ref$ycoef, 1, ref$ysd, FUN = "/")
+  }
+
+  xsim <- cos_sim(ref$xcoef, fm$xcoef)
+  ysim <- cos_sim(ref$ycoef, fm$ycoef)
+  sim <- (xsim + ysim) / 2
+
+}
+
+##' Compute the CCA with unit variance constraint
 ##'
 ##' This is a simple wrapper around stats::cancor. stats::cancor uses the Golub
 ##' and Van Loan algorithm, which yields canonical variates that have unit norm
@@ -215,9 +205,13 @@ cos_sim <- function(x, y) {
 ##' undesirable if we wish to perform inference on the weights in
 ##' xcoef or ycoef, because their scale will vary with N.
 ##'
-##' This function simply calls stats::cancor and then multiplies both xcoef and
-##' ycoef by sqrt(N-1) so that the resulting canonical variates will indeed have
-##' unit variance.
+##' This function calls stats::cancor and then multiplies both xcoef and ycoef
+##' by sqrt(N-1) so that the resulting canonical variates will indeed have unit
+##' variance.
+##'
+##' In addition, this function adds two new fields to the result, which hold the
+##' columnwise standard deviations of x and y, respectively. These fields may be
+##' useful for downstream tasks (e.g., alignment).
 ##'
 ##' See the documentation for stats::cancor for more details on standard usage.
 ##'
@@ -236,6 +230,8 @@ cancor_scaled <- function(x, y, xcenter = TRUE, ycenter = TRUE,
   fm <- stats::cancor(x, y, xcenter, ycenter)
   fm$xcoef <- sqrt(n - 1) * fm$xcoef
   fm$ycoef <- sqrt(n - 1) * fm$ycoef
+  fm$xsd <- apply(as.matrix(x), 2, sd)
+  fm$ysd <- apply(as.matrix(y), 2, sd)
   fm <- align(fm, ref)
   return(fm)
 }
