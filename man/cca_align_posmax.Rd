@@ -4,10 +4,12 @@
 \alias{cca_align_posmax}
 \title{Fix cancor signs based on the max entry in each column}
 \usage{
-cca_align_posmax(fm)
+cca_align_posmax(fm, ref)
 }
 \arguments{
 \item{fm}{A fitted object returned by cancor}
+
+\item{ref}{Not used}
 }
 \value{
 Same object as returned by cancor after sign-flipping per

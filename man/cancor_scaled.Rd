@@ -26,12 +26,8 @@ cancor_scaled(
 
 \item{ref}{Passed through to align}
 }
-\value{
-
-}
 \description{
-Compute the canonical correlations between two data matrices such that
-canonical variates have unit variance.
+Compute the CCA with unit variance constraint
 }
 \details{
 This is a simple wrapper around stats::cancor. stats::cancor uses the Golub
@@ -42,9 +38,13 @@ of 1/(N-1), where N is the number of observations. This is
 undesirable if we wish to perform inference on the weights in
 xcoef or ycoef, because their scale will vary with N.
 
-This function simply calls stats::cancor and then multiplies both xcoef and
-ycoef by sqrt(N-1) so that the resulting canonical variates will indeed have
-unit variance.
+This function calls stats::cancor and then multiplies both xcoef and ycoef
+by sqrt(N-1) so that the resulting canonical variates will indeed have unit
+variance.
+
+In addition, this function adds two new fields to the result, which hold the
+columnwise standard deviations of x and y, respectively. These fields may be
+useful for downstream tasks (e.g., alignment).
 
 See the documentation for stats::cancor for more details on standard usage.
 }

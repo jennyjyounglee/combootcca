@@ -17,7 +17,8 @@ cca_ci_asymptotic(x, y, level = 0.9, align = cca_align_posdiag, ref)
 coefficients to render the solution well-identified. By default, this uses
 cancor_signfix_diag, which ensures that the diagonal of xcoef is
 non-negative. Should also take "ref" or "..." as an argument (but doesn't
-have to use it).}
+have to use it). If a string is passed, it will be converted to the
+function with the same name.}
 
 \item{ref}{A reference solution to align against}
 }

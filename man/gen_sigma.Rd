@@ -56,10 +56,11 @@ rho_max minus rho_gap is strictly greater than 0.
 
 Initially, the canonical correlations are placed along the diagonal of a
 putative cross-covariance matrix, but to make the problem non-trivial, a
-random orthogonal matrix (drawn with respect to Haar measure) is applied
-from the left and the right before whitening with the square roots of the
-covariance matrices of X and Y (although since these are identity matrices
-at the moment, this last step has no effect).
+random orthogonal matrix (drawn with respect to Haar measure) is optionally
+(governed by the argument \code{random_rotation}) applied from the left and the
+right before whitening with the square roots of the covariance matrices of X
+and Y (although since these are identity matrices at the moment, this last
+step has no effect).
 
 Note: For now, the rotations are actually hard-coded to be identity matrices
 to make the problem very sparse. Also, all canonical correlations except for
