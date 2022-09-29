@@ -1263,6 +1263,37 @@ cancor_thresh <- function(fm, thresh = 1e-10) { #
   return(fm)
 }
 
+
+varival <- function(x) {
+  ## compute the value of the varimax objective for matrix x
+  n <- nrow(x)
+  k <- ncol(x)
+
+  squares <- 1 / n^2 * colSums(x^2)^2
+  fourths <- 1 / n * colSums(x^4)
+
+  v <- sum(fourths - squares)
+  return(v)
+}
+
+varival_relative <- function(x) {
+  ## compute the RELATIVE value of the varimax objective for matrix x. This is
+  ## found by maximizing and minimizing varival over right rotations, and then
+  ## rescaling
+  Qmax <- varimax(x, normalize = FALSE)$rotmat
+  vmax <- varival(x %*% Qmax)
+
+  Qmin <- psych::varimin(x, normalize = FALSE)$Th
+  vmin <- varival(x %*% Qmin)
+
+  v <- varival(x)
+
+  v_rel <- (v - vmin) / vmax
+
+  return(v_rel)
+}
+
+
 ## * Assess Coverage
 
 ##' @title Compute the best possible coverage of CCA CIs (allowing both sign
