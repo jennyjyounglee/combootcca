@@ -146,6 +146,25 @@ cca_align_hungarian_weighted <- function(fm, ref) {
   return(fm)
 }
 
+cca_align_procrustes_left <- function(fm, ref) {
+  rx <- procrustes(fm$xcoef, ref$xcoef)
+  ry <- procrustes(fm$ycoef, ref$ycoef)
+
+  fm$xcoef <- rx %*% fm$xcoef
+  fm$ycoef <- ry %*% fm$ycoef
+  fm$cor <- NULL
+  return(fm)
+}
+
+cca_align_procrustes_right <- function(fm, ref) {
+  rx <- procrustes(t(fm$xcoef), t(ref$xcoef))
+  ry <- procrustes(t(fm$ycoef), t(ref$ycoef))
+
+  fm$xcoef <- fm$xcoef %*% t(rx)
+  fm$ycoef <- fm$ycoef %*% t(ry)
+  fm$cor <- NULL
+  return(fm)
+}
 parse_align <- function(align) {
   if (is.function(align)) {
     return(align)
