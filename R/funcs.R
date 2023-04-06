@@ -165,6 +165,27 @@ cca_align_procrustes_right <- function(fm, ref) {
   fm$cor <- NULL
   return(fm)
 }
+
+cca_align_linear_left <- function(fm, ref) {
+  rx <- ref$xcoef %*% pracma::pinv(fm$xcoef)
+  ry <- ref$ycoef %*% pracma::pinv(fm$ycoef)
+
+  fm$xcoef <- rx %*% fm$xcoef
+  fm$ycoef <- ry %*% fm$ycoef
+  fm$cor <- NULL
+  return(fm)
+}
+
+cca_align_linear_right <- function(fm, ref) {
+  rx <- pracma::pinv(fm$xcoef) %*% ref$xcoef
+  ry <- pracma::pinv(fm$ycoef) %*% ref$ycoef
+
+  fm$xcoef <- fm$xcoef %*% rx
+  fm$ycoef <- fm$ycoef %*% ry
+  fm$cor <- NULL
+  return(fm)
+}
+
 parse_align <- function(align) {
   if (is.function(align)) {
     return(align)
