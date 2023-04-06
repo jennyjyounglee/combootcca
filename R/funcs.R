@@ -1230,6 +1230,13 @@ mat2fm <- function(mat, p) {
   return(fm)
 }
 
+procrustes <- function(A, B) {
+  M <- B %*% t(A)
+  SVD <- svd(M)
+  R <- SVD$u %*% t(SVD$v)
+  return(R)
+}
+
 mat2vec <- function(mat) c(mat)
 
 vec2fm <- function(vec, p, q) mat2fm(vec2mat(vec, p, q), p)
