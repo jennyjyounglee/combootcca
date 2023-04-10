@@ -1528,7 +1528,9 @@ cca_metric_standard <- function(fm_true, cis, ...) {
   covs <- cca_ci_coverage_signflip(fm_true, cis)
   lengths <- cca_ci_lengths(cis)
   sigdet <- cca_ci_sigdet(fm_true, cis)
-  res <- rbind(covs, lengths, sigdet)
+  h0 <- cca_ci_h0(fm_true, cis)
+  true <- cca_ci_true(fm_true, cis)
+  res <- rbind(covs, lengths, sigdet, h0, true)
   return(res)
 }
 
@@ -1603,6 +1605,63 @@ cca_ci_sigdet1 <- function(true_coef, cis_coef) {
     component = rep(1:K, each = p),
     coordinate = 1:p,
     value = c(sigdet)
+  )
+
+  return(res)
+}
+
+cca_ci_h0 <- function(fm_true, cis) {
+  fm_true <- cancor_thresh(fm_true)
+
+  h0s <- list()
+  h0s$x <- cca_ci_h01(fm_true$xcoef, cis$xcoef)
+  h0s$y <- cca_ci_h01(fm_true$ycoef, cis$ycoef)
+
+  h0 <- data.table::rbindlist(h0s, idcol = "variable")
+  return(h0)
+
+}
+
+
+cca_ci_h01 <- function(true_coef, cis_coef) {
+  p <- nrow(true_coef)
+  K <- ncol(true_coef)
+
+
+  h0 <- cis_coef[, , 1] >= 0 | 0 >= cis_coef[, , 2]
+
+  res <- data.table::data.table(
+    metric = "h0",
+    component = rep(1:K, each = p),
+    coordinate = 1:p,
+    value = c(h0)
+  )
+
+  return(res)
+}
+
+
+cca_ci_true <- function(fm_true, cis) {
+  fm_true <- cancor_thresh(fm_true)
+
+  trues <- list()
+  trues$x <- cca_ci_true1(fm_true$xcoef, cis$xcoef)
+  trues$y <- cca_ci_true1(fm_true$ycoef, cis$ycoef)
+
+  true <- data.table::rbindlist(trues, idcol = "variable")
+  return(true)
+}
+
+
+cca_ci_true1 <- function(true_coef, cis_coef) {
+  p <- nrow(true_coef)
+  K <- ncol(true_coef)
+
+  res <- data.table::data.table(
+    metric = "TrueValue",
+    component = rep(1:K, each = p),
+    coordinate = 1:p,
+    value = c(true_coef)
   )
 
   return(res)
