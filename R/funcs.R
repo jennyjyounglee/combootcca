@@ -856,33 +856,30 @@ gen_data <- function(Sigma, p, q, n) {
 ##' Generate a square covariance matrix for use with CCA.
 ##'
 ##' For CCA simulation studies, it is convenient to be able to generate a
-##' "random" covariance matrix. The current approach is quite simple. It first
-##' creates identity matrices of size p and q that serve as the covariance of X
-##' and Y, respectively. These are placed along the diagonal of the covariance
-##' matrix.
+##' "random" covariance matrix. The current approach proceeds by constructing
+##' Gamma (the canonical directions associated with Y), Beta (the canonical
+##' directions associated with X), and rho (the canonical correlations
+##' themselves). It then inverts the CCA formulation (using cancor_inv_cov) so
+##' that the resultant covariance matrix (Sigma) would, if subjected to CCA
+##' (e.g., with cancor_cov), yield Gamma, Beta, and rho.
 ##'
-##' Next, a sequence of singular values (the canonical correlations) are
-##' generated. The difficulty of the estimation problem is (probably) a function
-##' of both how big the canonical correlations are as well as their separation.
-##' Currently, the largest canonical correlation will be set to rho_max. The
-##' remaining canonical correlations will begin at rho_max - rho_gap and then
-##' decay exponentially according to (rho_max - rho_gap)^((t - 1) * rho_decay),
-##' where t is an integer that indicates the index of the canonical correlation.
+##' Both Gamma and Beta are constructed with iid standard normal entries,
+##' although the second coordinate of the first canonical direction associated
+##' with Y can be manually specified (as the argument gamma21).
+##'
+##' Next, a sequence of the canonical correlations are generated. Currently, the
+##' largest canonical correlation will be set to rho_max. The remaining
+##' canonical correlations will begin at rho_max - rho_gap and then decay
+##' exponentially according to (rho_max - rho_gap)^((t - 1) * rho_decay), where
+##' t is an integer that indicates the index of the canonical correlation.
 ##'
 ##' It is contingent on the user to ensure that rho_max is in (0, 1) and that
 ##' rho_max minus rho_gap is strictly greater than 0.
 ##'
-##' Initially, the canonical correlations are placed along the diagonal of a
-##' putative cross-covariance matrix, but to make the problem non-trivial, a
-##' random orthogonal matrix (drawn with respect to Haar measure) is optionally
-##' (governed by the argument `random_rotation`) applied from the left and the
-##' right before whitening with the square roots of the covariance matrices of X
-##' and Y (although since these are identity matrices at the moment, this last
-##' step has no effect).
+##' Note: If p \neq q, then the inverse mapping is not unique. See the
+##' documentation of cancor_inv_cov for details of how this is handled.
 ##'
-##' Note: For now, the rotations are actually hard-coded to be identity matrices
-##' to make the problem very sparse. Also, all canonical correlations except for
-##' the first (rho_max) are set to 0.
+##'
 ##' @title Generate random covariance matrix for CCA
 ##' @param p Dimension of X random variable
 ##' @param q Dimension of Y random variable
@@ -893,43 +890,29 @@ gen_data <- function(Sigma, p, q, n) {
 ##'   first) decay. Should be a strictly positive number. Small values will give
 ##'   very gradual decay and poor spacing, very large values will asymptote at 0
 ##'   very quickly and also give poor spacing. See details for more information.
-##' @param random_rotation Should the CCA directions be randomly rotated?
+##' @param gamma21 User-specified value for the second element of the first
+##'   canonical direction associated with Y. If NULL (default) then this will be
+##'   iid N(0, 1) like the rest of Gamma.
 ##' @return A square, positive definite matrix with p+q rows/cols
 ##' @author Dan Kessler
 ##' @export
 gen_sigma <- function(p, q, rho_max = 0.9, rho_gap = 0.1, rho_decay = 1,
-                      random_rotation = FALSE) {
+                      gamma21 = NULL) {
+
   K <- min(p, q)
 
-  sxx <- diag(p)
-  syy <- diag(q)
+  Gamma <- matrix(rnorm(q * K), nrow = q, ncol = K)
+  Beta <- matrix(rnorm(p * K), nrow = p, ncol = K)
 
-  sxx_sqrt <- expm::sqrtm(sxx)
-  syy_sqrt <- expm::sqrtm(syy)
-
-  if (random_rotation) {
-    qx <- randortho_fixed(p)
-    qy <- randortho_fixed(q)
-  } else {
-    qx <- diag(p)
-    qy <- diag(q)
+  if (!is.null(gamma21)) {
+    Gamma[2, 1] <- gamma21
   }
 
   rho <- rep(0, K)
   rho[1] <- rho_max
   rho[2:K] <- (rho_max - rho_gap)^(rho_decay * (2:K - 1))
-  rho[2:K] <- 0
-  s <- matrix(0, q, p)
-  diag(s) <- rho
 
-  syx <- syy_sqrt %*% qy %*% s %*% t(qx) %*% sxx_sqrt
-
-  sigma <- matrix(0, p + q, p + q)
-  sigma[1:p, 1:p] <- sxx
-  sigma[(p + 1):(p + q), (p + 1):(p + q)] <- syy
-  sigma[(p + 1):(p + q), 1:p] <- syx
-  sigma[1:p, (p + 1):(p + q)] <- t(syx)
-
+  sigma <- cancor_inv_cov(Beta, Gamma, rho)
   return(sigma)
 }
 
