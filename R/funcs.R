@@ -272,6 +272,7 @@ cancor_scaled <- function(x, y, xcenter = TRUE, ycenter = TRUE,
   fm$ycoef <- sqrt(n - 1) * fm$ycoef
   fm$xsd <- apply(as.matrix(x), 2, sd)
   fm$ysd <- apply(as.matrix(y), 2, sd)
+  align <- parse_align(align)
   fm <- align(fm, ref)
   return(fm)
 }
@@ -305,6 +306,7 @@ cca_ci_asymptotic <- function(x, y, level = .90,
   K <- min(p, q, n)
 
   fm <- cancor_scaled(x, y)
+  align <- parse_align(align)
   fm <- align(fm, ref)
   fm$xcoef <- fm$xcoef[, 1:K]
   fm$ycoef <- fm$ycoef[, 1:K]
@@ -396,6 +398,7 @@ cca_ci_absboot <- function(x, y, level = .90, align = cca_align_nil, ref,
   q <- ncol(y)
 
   fm <- cancor_scaled(x, y)
+  align <- parse_align(align)
   fm <- align(fm, ref)
   K <- length(fm$cor)
 
@@ -987,6 +990,7 @@ cancor_cov <- function(Sigma, px, align = cca_align_nil, ref) {
 
   svd(Sigma)
   fm <- list(cor = rho, xcoef = xcoef, ycoef = ycoef)
+  align <- parse_align(align)
   fm <- align(fm, ref)
   return(fm)
 }
@@ -1082,6 +1086,7 @@ cancor_vec <- function(data, p, align, ref) {
   x <- data[, 1:p]
   y <- data[, (p + 1):(p + q)]
   fm <- cancor_scaled(x, y)
+  align <- parse_align(align)
   fm <- align(fm, ref)
   theta <- fm2vec(fm)
   return(theta)
