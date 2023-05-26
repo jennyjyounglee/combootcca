@@ -265,7 +265,7 @@ cca_cos_sim <- function(fm, ref) {
 ##' @return
 ##' @author Daniel Kessler
 cancor_scaled <- function(x, y, xcenter = TRUE, ycenter = TRUE,
-                          align = cca_align_posdiag, ref) {
+                          align = cca_align_nil, ref) {
   n <- nrow(x)
   fm <- stats::cancor(x, y, xcenter, ycenter)
   fm$xcoef <- sqrt(n - 1) * fm$xcoef
@@ -297,7 +297,7 @@ cancor_scaled <- function(x, y, xcenter = TRUE, ycenter = TRUE,
 ##' @author Dan Kessler
 ##' @export
 cca_ci_asymptotic <- function(x, y, level = .90,
-                              align = cca_align_posdiag, ref) {
+                              align = cca_align_nil, ref) {
   align <- parse_align(align)
   n <- nrow(x)
   p <- ncol(x)
@@ -388,7 +388,7 @@ cca_ci_asymptotic <- function(x, y, level = .90,
 ##' @return List with two objects: xcoef and ycoef.
 ##' @author Daniel Kessler
 ##' @export
-cca_ci_absboot <- function(x, y, level = .90, align = cca_align_posdiag, ref,
+cca_ci_absboot <- function(x, y, level = .90, align = cca_align_nil, ref,
                              nboots = 1e3, parametric = FALSE, progress = 0) {
   align <- parse_align(align)
   n <- nrow(x)
@@ -498,7 +498,7 @@ cca_ci_absboot <- function(x, y, level = .90, align = cca_align_posdiag, ref,
 ##' @return List with two objects: xcoef and ycoef.
 ##' @author Dan Kessler
 ##' @export
-cca_ci_regression <- function(x, y, level = .90, align = cca_align_posdiag, ref,
+cca_ci_regression <- function(x, y, level = .90, align = cca_align_nil, ref,
                               train_ratio = 0.5) {
   align <- parse_align(align)
   n <- nrow(x)
@@ -568,7 +568,7 @@ cca_ci_regression <- function(x, y, level = .90, align = cca_align_posdiag, ref,
 ##' @return List of several types of CIs
 ##' @author Dan Kessler
 ##' @export
-cca_ci_boot <- function(x, y, level=0.90, align = cca_align_posdiag,
+cca_ci_boot <- function(x, y, level=0.90, align = cca_align_nil,
                         ref, nboots = 1e2, ncpus = 1,
                         boot_type = c("norm", "basic", "perc", "bca")) {
   align <- parse_align(align)
@@ -970,7 +970,7 @@ randortho_fixed <- function(n, type = c("orthonormal", "unitary")) {
 ##' ycoef: estimated coefficients for the y variables
 ##' @author Daniel Kessler
 ##' @export
-cancor_cov <- function(Sigma, px, align = cca_align_posdiag, ref) {
+cancor_cov <- function(Sigma, px, align = cca_align_nil, ref) {
   p <- nrow(Sigma)
   sxx <- Sigma[1:px, 1:px]
   syy <- Sigma[(px + 1):p, (px + 1):p]
