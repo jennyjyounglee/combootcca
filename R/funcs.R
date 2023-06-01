@@ -17,6 +17,9 @@
 ##' @return 
 ##' @author Dan Kessler
 cca_align_nil <- function(fm, ref) {
+  k <- length(fm$cor)
+  fm$xcoef <- fm$xcoef[, 1:k, drop = FALSE]
+  fm$ycoef <- fm$ycoef[, 1:k, drop = FALSE]
   return(fm)
 }
 
