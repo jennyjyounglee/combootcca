@@ -14,7 +14,7 @@ test_that("cancor_cov is a proper inverse of cancor_inv_cov regardless of dimens
 
   Sigma <- do.call(cancor_inv_cov, fm1)
 
-  fm2 <- cancor_cov(Sigma, p)
+  fm2 <- cancor_cov(Sigma, p, align = cca_align_posdiag)
 
   expect_equal(fm1, fm2)
 })
