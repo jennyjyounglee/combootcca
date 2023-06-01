@@ -1506,10 +1506,11 @@ hungarian_max_signflip <- function(C) {
   C_check <- max(C_check) - C_check # flip around to maximize while staying nn
 
   sol_abs <- RcppHungarian::HungarianSolver(C_check)
-  P_star <- matrix(0, k2, k2)
+  P_star <- matrix(0, k1, k2)
   P_star[sol_abs$pairs] <- 1
+  P_star <- t(P_star)
 
-  signs <- c(diag(nonneg(C %*% P_star)), rep(0, k2 - k1))
+  signs <- c(diag(nonneg(C %*% P_star)))
 
   D_star <- diag(signs)
 

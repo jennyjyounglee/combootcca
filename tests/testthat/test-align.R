@@ -30,8 +30,22 @@ test_that("Generalized Hungarian Algorithm Works: Square", {
 })
 
 test_that("Generalized Hungarian Algorithm Works: Wide", {
-  C <- matrix(c(0, 5, -10, 0, 0, 0), 2, 3)
-  P <- matrix(c(0, -1, 0, 1, 0, 0, 0, 0, 0), 3, 3)
+
+  C <- matrix(
+    c(0, -10, 3,
+      5, 0, 25),
+    byrow = TRUE,
+    2, 3)
+
+  P <- matrix(
+    c(
+      0, 0,
+      -1, 0,
+      0, 1
+    ),
+    byrow = TRUE,
+    3, 2
+  )
 
   expect_equal(hungarian_max_signflip(C), P)
 })
