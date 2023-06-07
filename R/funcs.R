@@ -17,9 +17,9 @@
 ##' @return 
 ##' @author Dan Kessler
 cca_align_nil <- function(fm, ref) {
-  k <- length(fm$cor)
-  fm$xcoef <- fm$xcoef[, 1:k, drop = FALSE]
-  fm$ycoef <- fm$ycoef[, 1:k, drop = FALSE]
+
+  fm <- cca_trim(fm)
+
   return(fm)
 }
 
@@ -34,10 +34,13 @@ cca_align_nil <- function(fm, ref) {
 ##' @return Object like fm but with possible sign flips
 ##' @author Dan Kessler
 cca_align_posdiag <- function(fm, ref) {
-  k <- length(fm$cor)
-  fm$xcoef <- fm$xcoef[, 1:k, drop = FALSE]
-  fm$ycoef <- fm$ycoef[, 1:k, drop = FALSE]
-  signs <- diag(x = nonneg(diag(fm$xcoef)), nrow = k, ncol = k)
+
+  fm <- cca_trim(fm)
+  fm_std <- cca_standardize(fm)
+
+  k <- ncol(fm_std$xcoef)
+  signs <- diag(x = nonneg(diag(fm_std$xcoef)), nrow = k, ncol = k)
+
   fm$xcoef <- fm$xcoef %*% signs
   fm$ycoef <- fm$ycoef %*% signs
   return(fm)
@@ -64,37 +67,34 @@ cca_align_posdiag <- function(fm, ref) {
 ##'     the identifiability condition discussed in Details.
 ##' @author Daniel Kessler
 cca_align_posmax <- function(fm, ref) {
-  k <- length(fm$cor)
 
-  theta <- rbind(fm$xcoef[, 1:k, drop = FALSE], fm$ycoef[, 1:k, drop = FALSE])
+  fm <- cca_trim(fm)
+  fm_std <- cca_standardize(fm)
+
+  k <- ncol(fm_std$xcoef)
+
+  theta <- rbind(fm_std$xcoef, fm_std$ycoef)
 
   maxes <- apply(theta, 2, absmax)
 
   flip <- diag(x = nonneg(maxes), nrow = k, ncol = k)
 
-  fm$xcoef[, 1:k] <- fm$xcoef[, 1:k] %*% flip
-  fm$ycoef[, 1:k] <- fm$ycoef[, 1:k] %*% flip
+  fm$xcoef <- fm$xcoef %*% flip
+  fm$ycoef <- fm$ycoef %*% flip
 
   return(fm)
 }
 
 cca_align_signflip <- function(fm, ref) {
-  k <- length(fm$cor)
 
-  theta_hat <- rbind(
-    fm$xcoef[, 1:k, drop = FALSE],
-    fm$ycoef[, 1:k, drop = FALSE]
-  )
+  fm <- cca_trim(fm)
+  ref <- cca_trim(ref)
+  fm_std <- cca_standardize(fm)
+  ref_std <- cca_standardize(ref)
 
-  theta_ref <- rbind(
-    ref$xcoef[, 1:k, drop = FALSE],
-    ref$ycoef[, 1:k, drop = FALSE]
-  )
-
-  sim_sign <- nonneg(cos_sim(theta_ref, theta_hat))
+  sim_sign <- nonneg(cca_cos_sim(fm_std, ref_std))
 
   signs <- diag(sim_sign)
-
 
   fm$xcoef <- fm$xcoef %*% diag(signs)
   fm$ycoef <- fm$ycoef %*% diag(signs)
@@ -103,7 +103,13 @@ cca_align_signflip <- function(fm, ref) {
 }
 
 cca_align_greedy <- function(fm, ref) {
-  sim <- cca_cos_sim(fm, ref)
+
+  fm <- cca_trim(fm)
+  ref <- cca_trim(ref)
+  fm_std <- cca_standardize(fm)
+  ref_std <- cca_standardize(ref)
+
+  sim <- cca_cos_sim(fm_std, ref_std)
 
   ## decompose into signed similarity
   sim_sign <- nonneg(sim)
@@ -121,37 +127,66 @@ cca_align_greedy <- function(fm, ref) {
   fm$xcoef <- fm$xcoef[, map] %*% diag(signs)
   fm$ycoef <- fm$ycoef[, map] %*% diag(signs)
 
+  if (!is.null(fm$cor)) {
+    fm$cor <- fm$cor[map]
+  }
+
   return(fm)
 }
 
 cca_align_hungarian <- function(fm, ref) {
-  sim <- cca_cos_sim(fm, ref)
+
+  fm <- cca_trim(fm)
+  ref <- cca_trim(ref)
+  fm_std <- cca_standardize(fm)
+  ref_std <- cca_standardize(ref)
+
+  sim <- cca_cos_sim(fm_std, ref_std)
 
   P <- hungarian_max_signflip(sim)
 
   fm$xcoef <- fm$xcoef %*% P
   fm$ycoef <- fm$ycoef %*% P
-  fm$cor <- as.vector(fm$cor %*% abs(P))
+
+  if (!is.null(fm$cor)) {
+    fm$cor <- as.vector(fm$cor %*% abs(P))
+  }
+
   return(fm)
 }
 
 ## weight by square roots of reference and fitted canonical correlations
 cca_align_hungarian_weighted <- function(fm, ref) {
-  sim <- cca_cos_sim(fm, ref)
+  fm <- cca_trim(fm)
+  ref <- cca_trim(ref)
+  fm_std <- cca_standardize(fm)
+  ref_std <- cca_standardize(ref)
 
-  sim_weighted <- diag(sqrt(ref$cor)) %*% sim %*% diag(sqrt(fm$cor))
+  sim <- cca_cos_sim(fm_std, ref_std)
+
+  sim_weighted <- diag(sqrt(ref_std$cor)) %*% sim %*% diag(sqrt(fm_std$cor))
 
   P <- hungarian_max_signflip(sim_weighted)
 
   fm$xcoef <- fm$xcoef %*% P
   fm$ycoef <- fm$ycoef %*% P
-  fm$cor <- as.vector(fm$cor %*% abs(P))
+
+  if (!is.null(fm$cor)) {
+    fm$cor <- as.vector(fm$cor %*% abs(P))
+  }
+
   return(fm)
 }
 
 cca_align_procrustes_left <- function(fm, ref) {
-  rx <- procrustes(fm$xcoef, ref$xcoef)
-  ry <- procrustes(fm$ycoef, ref$ycoef)
+
+  fm <- cca_trim(fm)
+  ref <- cca_trim(ref)
+  fm_std <- cca_standardize(fm)
+  ref_std <- cca_standardize(ref)
+
+  rx <- procrustes(fm_std$xcoef, ref_std$xcoef)
+  ry <- procrustes(fm_std$ycoef, ref_std$ycoef)
 
   fm$xcoef <- rx %*% fm$xcoef
   fm$ycoef <- ry %*% fm$ycoef
@@ -160,8 +195,14 @@ cca_align_procrustes_left <- function(fm, ref) {
 }
 
 cca_align_procrustes_right <- function(fm, ref) {
-  rx <- procrustes(t(fm$xcoef), t(ref$xcoef))
-  ry <- procrustes(t(fm$ycoef), t(ref$ycoef))
+
+  fm <- cca_trim(fm)
+  ref <- cca_trim(ref)
+  fm_std <- cca_standardize(fm)
+  ref_std <- cca_standardize(ref)
+
+  rx <- procrustes(t(fm_std$xcoef), t(ref_std$xcoef))
+  ry <- procrustes(t(fm_std$ycoef), t(ref_std$ycoef))
 
   fm$xcoef <- fm$xcoef %*% t(rx)
   fm$ycoef <- fm$ycoef %*% t(ry)
@@ -170,8 +211,14 @@ cca_align_procrustes_right <- function(fm, ref) {
 }
 
 cca_align_linear_left <- function(fm, ref) {
-  rx <- ref$xcoef %*% pracma::pinv(fm$xcoef)
-  ry <- ref$ycoef %*% pracma::pinv(fm$ycoef)
+
+  fm <- cca_trim(fm)
+  ref <- cca_trim(ref)
+  fm_std <- cca_standardize(fm)
+  ref_std <- cca_standardize(ref)
+
+  rx <- ref_std$xcoef %*% pracma::pinv(fm_std$xcoef)
+  ry <- ref_std$ycoef %*% pracma::pinv(fm_std$ycoef)
 
   fm$xcoef <- rx %*% fm$xcoef
   fm$ycoef <- ry %*% fm$ycoef
@@ -180,8 +227,14 @@ cca_align_linear_left <- function(fm, ref) {
 }
 
 cca_align_linear_right <- function(fm, ref) {
-  rx <- pracma::pinv(fm$xcoef) %*% ref$xcoef
-  ry <- pracma::pinv(fm$ycoef) %*% ref$ycoef
+
+  fm <- cca_trim(fm)
+  ref <- cca_trim(ref)
+  fm_std <- cca_standardize(fm)
+  ref_std <- cca_standardize(ref)
+
+  rx <- pracma::pinv(fm_std$xcoef) %*% ref_std$xcoef
+  ry <- pracma::pinv(fm_std$ycoef) %*% ref_std$ycoef
 
   fm$xcoef <- fm$xcoef %*% rx
   fm$ycoef <- fm$ycoef %*% ry
@@ -217,23 +270,31 @@ cos_sim <- function(x, y) {
   return(t(x) %*% y)
 }
 
-cca_cos_sim <- function(fm, ref) {
+cca_trim <- function(fm) {
+  if (!is.null(fm$cor)) {
+    k <- length(fm$cor)
+    fm$xcoef <- fm$xcoef[, 1:k, drop = FALSE]
+    fm$ycoef <- fm$ycoef[, 1:k, drop = FALSE]
+  }
+  return(fm)
+}
 
+cca_standardize <- function(fm) {
   if (!is.null(fm$xsd)) {
     fm$xcoef <- sweep(fm$xcoef, 1, fm$xsd, FUN = "*")
   }
   if (!is.null(fm$ysd)) {
     fm$ycoef <- sweep(fm$ycoef, 1, fm$ysd, FUN = "*")
   }
-  if (!is.null(ref$xsd)) {
-    ref$xcoef <- sweep(ref$xcoef, 1, ref$xsd, FUN = "*")
-  }
-  if (!is.null(ref$ysd)) {
-    ref$ycoef <- sweep(ref$ycoef, 1, ref$ysd, FUN = "*")
-  }
+  return(fm)
+}
 
-  xsim <- cos_sim(ref$xcoef, fm$xcoef)
-  ysim <- cos_sim(ref$ycoef, fm$ycoef)
+cca_cos_sim <- function(fm, ref) {
+  fm_std <- cca_standardize(fm)
+  ref_std <- cca_standardize(ref)
+
+  xsim <- cos_sim(ref_std$xcoef, fm_std$xcoef)
+  ysim <- cos_sim(ref_std$ycoef, fm_std$ycoef)
   sim <- (xsim + ysim) / 2
 
 }
