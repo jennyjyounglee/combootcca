@@ -220,16 +220,16 @@ cos_sim <- function(x, y) {
 cca_cos_sim <- function(fm, ref) {
 
   if (!is.null(fm$xsd)) {
-    fm$xcoef <- sweep(fm$xcoef, 1, fm$xsd, FUN = '/')
+    fm$xcoef <- sweep(fm$xcoef, 1, fm$xsd, FUN = "*")
   }
   if (!is.null(fm$ysd)) {
-    fm$ycoef <- sweep(fm$ycoef, 1, fm$ysd, FUN = "/")
+    fm$ycoef <- sweep(fm$ycoef, 1, fm$ysd, FUN = "*")
   }
   if (!is.null(ref$xsd)) {
-    ref$xcoef <- sweep(ref$xcoef, 1, ref$xsd, FUN = "/")
+    ref$xcoef <- sweep(ref$xcoef, 1, ref$xsd, FUN = "*")
   }
   if (!is.null(ref$ysd)) {
-    ref$ycoef <- sweep(ref$ycoef, 1, ref$ysd, FUN = "/")
+    ref$ycoef <- sweep(ref$ycoef, 1, ref$ysd, FUN = "*")
   }
 
   xsim <- cos_sim(ref$xcoef, fm$xcoef)
