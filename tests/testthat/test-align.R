@@ -54,9 +54,11 @@ test_that("Generalized Hungarian Algorithm Works: Wide", {
 })
 
 test_that("Signflip Works", {
+
   fm <- list()
-  fm$xcoef <- matrix(c(0.9, 0.1, 0, -0.9, 0, 0, .5, 0, -1.5), 3, 3)
+  fm$xcoef <- matrix(c(0.9, 0.1, 0, -0.9, 0, 0, .5, 0, -2.5), 3, 3)
   fm$ycoef <- diag(3)
+  fm$ycoef[3, 3] <- -1
   fm$cor <- c(0.9, 0.5, 0.1)
 
   ref <- list()
