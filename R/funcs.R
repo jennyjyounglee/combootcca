@@ -1232,8 +1232,7 @@ cancor_vec <- function(data, p, align, ref) {
 ##'   then pass a single square covariance matrix of dimension (p + q)
 ##' @param data_is_sigma If true, treat "data" as sigma: a square covariance
 ##'   matrix of dimension (p + q)
-##' @param p The dimension of the random variable X
-##' @param q The dimension of the random variable Y
+##' @param pq A 2-vector with the dimension of the random variables X, Y
 ##' @param n The number of observations
 ##' @param cov_type Specifies covariance structure for X and Y. If "id", then
 ##'   both have identity covariance matrices. If "sPrec", then both will
@@ -1245,11 +1244,16 @@ cancor_vec <- function(data, p, align, ref) {
 ##' @author Daniel Kessler
 ##' @export
 bt_problem_std_fun <- function(job = NULL, data = NULL, data_is_sigma = FALSE,
-                               p = NULL, q = NULL, n = NULL,
+                               pq = NULL , n = NULL,
                                cov_type = c("id", "sPrec")[1],
                                rho1 = 0.9,
                                rho2 = 0,
                                inreps = 1L, ...) {
+
+  if (is.vector(pq)) {
+    p <-  pq[1]
+    q <- pq[2]
+  }
 
   prob_fun_inner <- function(use_data = FALSE) {
     res <- list()
