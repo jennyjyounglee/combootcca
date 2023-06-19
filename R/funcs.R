@@ -987,6 +987,65 @@ gen_sigma <- function(p, q, rho_max = 0.9, rho_gap = 0.1, rho_decay = 1,
   return(sigma)
 }
 
+gen_sigma2 <- function(p, q, cov_type, rho1, rho2) {
+
+  if (cov_type == "id") {
+    sxx <- diag(p)
+    syy <- diag(q)
+  }
+
+  if (cov_type == "sPrec") {
+    sxx <- gen_sPrec(p)
+    syy <- gen_sPrec(q)
+  }
+
+  beta1 <- normalize_wrtIP(rep(c(1, 0), c(2, p - 2)), sxx)
+  beta2 <- normalize_wrtIP(rep(c(0, 1), c(p - 2, 2)), sxx)
+  gamma1 <- normalize_wrtIP(rep(c(1, 0), c(2, q - 2)), syy)
+  gamma2 <- normalize_wrtIP(rep(c(0, 1), c(q - 2, 2)), syy)
+
+  syx_tmp <- rho1 * gamma1 %*% t(beta1) + rho2 * gamma2 %*% t(beta2)
+  syx <- syy %*% syx_tmp %*% sxx
+
+  sigma <- matrix(NA, p + q, p + q)
+  sigma[1:p, 1:p] <- sxx
+  sigma[(p + 1):(p + q), (p + 1):(p + q)] <- syy
+  sigma[(p + 1):(p + q), 1:p] <- syx
+  sigma[1:p, (p + 1):(p + q)] <- t(syx)
+
+  return(sigma)
+}
+
+gen_sPrec <- function(p) {
+  omega <- matrix(0, p, p)
+
+  omega[abs(row(omega) - col(omega)) == 1] <- 0.5
+  omega[abs(row(omega) - col(omega)) == 2] <- 0.4
+
+  ## add a breakwall
+  wall1 <- round(p / 2)
+  wall2 <- wall1 - 1
+
+  omega[wall1, ] <- 0
+  omega[, wall1] <- 0
+  omega[wall2, ] <- 0
+  omega[, wall2] <- 0
+
+  ## set the diagonal
+  omega[abs(row(omega) - col(omega)) == 0] <- 1
+
+  sigma <- solve(omega)
+  return(sigma)
+}
+
+## Normalize with respect to inner product, x is vector to normalize, s is
+## matrix that induces inner product
+normalize_wrtIP <- function(x, s) {
+  magnitude <- norm(t(x) %*% s %*% x, type = "2")
+  x0 <- x / magnitude
+  return(x0)
+}
+
 ## like pracma::randortho but without the bug
 randortho_fixed <- function(n, type = c("orthonormal", "unitary")) {
     stopifnot(is.numeric(n), length(n) == 1,
