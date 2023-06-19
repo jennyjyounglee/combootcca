@@ -1196,11 +1196,11 @@ bt_problem_std_fun <- function(job = NULL, data = NULL, data_is_sigma = FALSE,
   instance <- list()
   instance$inreps <- list()
 
-  if (!is.null(data) & !data_is_sigma) { # use the data as passed
+  if (!is.null(data) && !data_is_sigma) { # use the data as passed
     instance$inreps[1] <- prob_fun_inner(use_data = FALSE)
   }
 
-  if (!is.null(data) & data_is_sigma) { # sigma passed as data
+  if (!is.null(data) && data_is_sigma) { # sigma passed as data
     sigma <- data
     instance$inreps <- replicate(inreps, prob_fun_inner(), simplify = FALSE)
   }
@@ -1210,7 +1210,7 @@ bt_problem_std_fun <- function(job = NULL, data = NULL, data_is_sigma = FALSE,
     instance$inreps <- replicate(inreps, prob_fun_inner(), simplify = FALSE)
   }
 
-  if (data_is_sigma | is.null(data)) { # if we have ground truth, record it
+  if (data_is_sigma || is.null(data)) { # if we have ground truth, record it
     instance$fm_true <- cancor_cov(sigma, p)
   }
 
