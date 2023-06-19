@@ -1224,24 +1224,32 @@ cancor_vec <- function(data, p, align, ref) {
 
 ##' This is a convenience function for use with batchtools
 ##'
-##' The details go here
+##' TODO: Write details for sPrec
 ##' @title Batchtools convenience function for "problem"
 ##' @param job Constructed by batchtools
 ##' @param data Optionally, pass a list with named elements `x` and `y`, where
 ##'   each is an n by p and n by q matrix, respectively. Or, if `sigma` is true,
 ##'   then pass a single square covariance matrix of dimension (p + q)
+##' @param data_is_sigma If true, treat "data" as sigma: a square covariance
+##'   matrix of dimension (p + q)
 ##' @param p The dimension of the random variable X
 ##' @param q The dimension of the random variable Y
 ##' @param n The number of observations
-##' @param inreps How many replicates to draw
+##' @param cov_type Specifies covariance structure for X and Y. If "id", then
+##'   both have identity covariance matrices. If "sPrec", then both will
+##'   covariance corresponding to sparse precision matrices (see details).
+##' @param rho1 Largest canonical correlation
+##' @param rho2 Second largest canonical correlation
 ##' @param ... Additional arguments passed to gen_sigma
-##' @param data_is_sigma If true, treat "data" as sigma: a square covariance
-##'   matrix of dimension (p + q)
 ##' @return An instance
 ##' @author Daniel Kessler
 ##' @export
 bt_problem_std_fun <- function(job = NULL, data = NULL, data_is_sigma = FALSE,
-                               p = NULL, q = NULL, n = NULL, inreps = 1L, ...) {
+                               p = NULL, q = NULL, n = NULL,
+                               cov_type = c("id", "sPrec")[1],
+                               rho1 = 0.9,
+                               rho2 = 0,
+                               inreps = 1L, ...) {
 
   prob_fun_inner <- function(use_data = FALSE) {
     res <- list()
@@ -1265,7 +1273,7 @@ bt_problem_std_fun <- function(job = NULL, data = NULL, data_is_sigma = FALSE,
   }
 
   if (is.null(data)) { # do it from scratch
-    sigma <- gen_sigma(p, q, ...)
+    sigma <- gen_sigma2(p, q, cov_type, rho1, rho2, ...)
     instance$inreps <- replicate(inreps, prob_fun_inner(), simplify = FALSE)
   }
 
