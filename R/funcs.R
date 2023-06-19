@@ -1197,7 +1197,7 @@ bt_problem_std_fun <- function(job = NULL, data = NULL, data_is_sigma = FALSE,
   instance$inreps <- list()
 
   if (!is.null(data) && !data_is_sigma) { # use the data as passed
-    instance$inreps[1] <- prob_fun_inner(use_data = FALSE)
+    instance$inreps[1] <- prob_fun_inner(use_data = TRUE)
   }
 
   if (!is.null(data) && data_is_sigma) { # sigma passed as data
