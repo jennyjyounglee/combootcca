@@ -1041,8 +1041,8 @@ gen_sPrec <- function(p) {
 ## Normalize with respect to inner product, x is vector to normalize, s is
 ## matrix that induces inner product
 normalize_wrtIP <- function(x, s) {
-  magnitude <- norm(t(x) %*% s %*% x, type = "2")
-  x0 <- x / magnitude
+  magnitude <- drop(t(x) %*% s %*% x)
+  x0 <- x / sqrt(magnitude)
   return(x0)
 }
 
