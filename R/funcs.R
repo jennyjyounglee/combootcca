@@ -1239,7 +1239,6 @@ cancor_vec <- function(data, p, align, ref) {
 ##'   covariance corresponding to sparse precision matrices (see details).
 ##' @param rho1 Largest canonical correlation
 ##' @param rho2 Second largest canonical correlation
-##' @param ... Additional arguments passed to gen_sigma
 ##' @return An instance
 ##' @author Daniel Kessler
 ##' @export
@@ -1248,7 +1247,7 @@ bt_problem_std_fun <- function(job = NULL, data = NULL, data_is_sigma = FALSE,
                                cov_type = c("id", "sPrec")[1],
                                rho1 = 0.9,
                                rho2 = 0,
-                               inreps = 1L, ...) {
+                               inreps = 1L) {
 
   if (is.character(pq)) {
     pq_num <- as.integer(unlist(strsplit(pq, split = ",", fixed = TRUE)))
@@ -1278,7 +1277,7 @@ bt_problem_std_fun <- function(job = NULL, data = NULL, data_is_sigma = FALSE,
   }
 
   if (is.null(data)) { # do it from scratch
-    sigma <- gen_sigma2(p, q, cov_type, rho1, rho2, ...)
+    sigma <- gen_sigma2(p, q, cov_type, rho1, rho2)
     instance$inreps <- replicate(inreps, prob_fun_inner(), simplify = FALSE)
   }
 
