@@ -1023,8 +1023,8 @@ gen_sPrec <- function(p) {
   omega[abs(row(omega) - col(omega)) == 2] <- 0.4
 
   ## add a breakwall
-  wall1 <- round(p / 2)
-  wall2 <- wall1 - 1
+  wall1 <- floor(p / 2)
+  wall2 <- wall1 + 1
 
   omega[wall1, ] <- 0
   omega[, wall1] <- 0
