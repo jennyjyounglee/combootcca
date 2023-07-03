@@ -1180,7 +1180,11 @@ cancor_inv_cov <- function(xcoef, ycoef, cor) {
 ##' Fortify a covariance matrix by growing all eigenvalues past the K'th
 ##'
 ##' Some of our procedures may produce a covariance matrix that is very nearly
-##' rank deficient, i.e., eigenvalues past the K'th may be arbitrarily small. This function will attempt to remedy this by replacing all eigenvalues after the K'th with new values that are sorted uniforms drawn with support between 0 and the K'th eigenvalue
+##' rank deficient, i.e., eigenvalues past the K'th may be arbitrarily small.
+##' This function will attempt to remedy this by replacing all eigenvalues after
+##' the K'th with new values that are nonzero. Specifically, it will linearly
+##' interpolate between the smallest eigenvalue and 0 (without including either
+##' endpoint).
 ##' @title Fortify a covariance matrix
 ##' @param cov
 ##' @return Fortified covariance matrix
@@ -1189,7 +1193,7 @@ cov_fortify <- function(cov, K){
   p <- nrow(cov)
   eigs <- eigen(cov)
   lmax <- eigs$values[K]
-  lnew <- sort(runif(p - K, min = 0, max = lmax))
+  lnew <- seq(from = lmax, to = 0, length.out = p - K + 2)[2:(p - K + 1)]
   eigs$values[(K+1):p] <- lnew
 
   cov_new <- with(eigs, vectors %*% diag(values) %*% t(vectors))
