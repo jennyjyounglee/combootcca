@@ -1122,6 +1122,38 @@ cancor_cov <- function(Sigma, px, align = cca_align_nil, ref) {
   return(fm)
 }
 
+cancor_cov_fiddle <- function(sigma, p, fiddle.var, fiddle.comp, fiddle.val) {
+
+  fm_orig <- cancor_cov(sigma, p)
+  fm_new <- fm_orig
+
+  if (fiddle.var == "x") {
+    fm_new$xcoef <- cancor_direction_fiddle(
+      fm_new$xcoef, fiddle.comp, fiddle.val)
+  } else if (fiddle.var == "y") {
+    fm_new$ycoef <- cancor_direction_fiddle(
+      fm_new$ycoef, fiddle.comp, fiddle.val)
+  }
+  sigma_new <- cancor_inv_cov(fm_new$xcoef, fm_new$ycoef, fm_new$cor)
+  return(sigma_new)
+}
+
+## x is matrix of directions
+cancor_direction_fiddle <- function(x, comp, val) {
+  p <- nrow(x)
+  if (val == "0") {
+    newval <- 0
+  } else if (val == "mean") {
+    newval <- mean(abs(x[, comp]))
+  } else if (val == "max") {
+    newval <- max(abs(x[, comp]))
+  }
+
+  sgn <- nonneg(x[p, comp])
+  x[p, comp] <- sgn * newval
+  return(x)
+}
+
 ##' Given canonical directions and correlations, find an associated covariance matrix
 ##'
 ##' In the same way that cancor_cov maps from a covariance matrix to a
@@ -1238,6 +1270,10 @@ cancor_vec <- function(data, p, align, ref) {
 ##'   covariance corresponding to sparse precision matrices (see details).
 ##' @param rho1 Largest canonical correlation
 ##' @param rho2 Second largest canonical correlation
+##' @param fiddle.var Coefficients of which variable you want to modify
+##' @param fiddle.comp Component whose last coordinate you want to modify
+##' @param fiddle.val String, one of "0", "mean", or "max"
+##' @param inreps 
 ##' @return An instance
 ##' @author Daniel Kessler
 ##' @export
@@ -1246,6 +1282,9 @@ bt_problem_std_fun <- function(job = NULL, data = NULL, data_is_sigma = FALSE,
                                cov_type = c("id", "sPrec")[1],
                                rho1 = 0.9,
                                rho2 = 0,
+                               fiddle.var = NULL,
+                               fiddle.comp = NULL,
+                               fiddle.val = NULL,
                                inreps = 1L) {
 
   if (is.character(pq)) {
@@ -1272,6 +1311,9 @@ bt_problem_std_fun <- function(job = NULL, data = NULL, data_is_sigma = FALSE,
 
   if (!is.null(data) && data_is_sigma) { # sigma passed as data
     sigma <- data
+    if (!is.null(fiddle.var)) { # modify sigma
+      sigma <- cancor_cov_fiddle(sigma, p, fiddle.var, fiddle.comp, fiddle.val)
+    }
     instance$inreps <- replicate(inreps, prob_fun_inner(), simplify = FALSE)
   }
 
