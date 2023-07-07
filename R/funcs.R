@@ -753,6 +753,58 @@ cca_ci_boot <- function(x, y, level=0.90, align = cca_align_nil,
   return(res)
 }
 
+cca_ci_laha <- function(x, y, level = 0.90,
+                        align = cca_align_nil, ref) {
+
+  align <- parse_align(align)
+  n <- nrow(x)
+  p <- ncol(x)
+  q <- ncol(y)
+  K <- min(p, q, n)
+
+  fm <- cancor_scaled(x, y)
+  align <- parse_align(align)
+  fm <- align(fm, ref)
+  fm$xcoef <- fm$xcoef[, 1:K]
+  fm$ycoef <- fm$ycoef[, 1:K]
+
+  xvar <- matrix(NA, nrow = nrow(fm$xcoef), ncol = ncol(fm$xcoef))
+  yvar <- matrix(NA, nrow = nrow(fm$ycoef), ncol = ncol(fm$ycoef))
+
+  laha <- de.bias.cca::give_CCA(fm$xcoef[, 1], fm$ycoef[, 1], x, y)
+
+  xvar[, 1] <- laha[[3]][1:p]
+  yvar[, 1] <- laha[[3]][(p + 1) : (p + q)]
+
+  zcrit <- - qnorm((1 - level) / 2)
+
+  alpha <- 1 - level
+  ci_levels <- paste(c(100 * alpha / 2, 100 * (1 - alpha / 2)), "%")
+
+  adimnames <- list(
+    coordinate = NULL,
+    component = 1:K,
+    ci_levels
+  )
+
+  xcoef_ci <- array(NA, c(p, K, 2),
+                    dimnames = adimnames)
+
+  ycoef_ci <- array(NA, c(q, K, 2),
+                    dimnames = adimnames)
+
+  xcoef_ci[, , 1] <- fm$xcoef - sqrt(xvar / n) * zcrit
+  xcoef_ci[, , 2] <- fm$xcoef + sqrt(xvar / n) * zcrit
+
+
+  ycoef_ci[, , 1] <- fm$ycoef - sqrt(yvar / n) * zcrit
+  ycoef_ci[, , 2] <- fm$ycoef + sqrt(yvar / n) * zcrit
+
+
+  res <- list(xcoef = xcoef_ci, ycoef = ycoef_ci)
+  return(res)
+}
+
 ##' @title Refit a linear model such that predicted values have unit variance
 ##' @param fm An object fitted with lm
 ##' @return An object of type lm refit such that predicted values have unit
@@ -1365,6 +1417,26 @@ bt_algo_asymptotic <- function(job, data, instance, ...) {
     ...
   )
   res <- data.table::rbindlist(res_inreps, idcol= "inrep.id")
+  return(res)
+}
+
+
+##' @title Batchtools Function for Laha-based Confidence Intervals
+##' @param job required by batchtools
+##' @param data required by batchtools
+##' @param instance required by batchtools
+##' @param ... Arguments passed on to ci_func
+##' @return CI object
+##' @export
+##' @author Dan Kessler
+bt_algo_laha <- function(job, data, instance, ...) {
+  res_inreps <- lapply(instance$inreps, bt_algo_inrep,
+    ci_func = cca_ci_laha,
+    met_func = cca_metric_standard,
+    fm_true = instance$fm_true,
+    ...
+  )
+  res <- data.table::rbindlist(res_inreps, idcol = "inrep.id")
   return(res)
 }
 
