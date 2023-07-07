@@ -22,8 +22,10 @@ Imports:
     abind,
     RcppHungarian,
     data.table,
-    pracma
+    pracma,
+    de.bias.cca
 Suggests: 
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
 Remotes:
+    github::dankessler/de.bias.CCA@dev
