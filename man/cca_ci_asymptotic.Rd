@@ -4,7 +4,7 @@
 \alias{cca_ci_asymptotic}
 \title{Asymptotic confidence intervals for CCA directions}
 \usage{
-cca_ci_asymptotic(x, y, level = 0.9, align = cca_align_posdiag, ref)
+cca_ci_asymptotic(x, y, level = 0.9, align = cca_align_nil, ref)
 }
 \arguments{
 \item{x}{Data matrix of size n by p}

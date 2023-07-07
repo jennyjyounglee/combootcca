@@ -8,7 +8,7 @@ cca_ci_absboot(
   x,
   y,
   level = 0.9,
-  align = cca_align_posdiag,
+  align = cca_align_nil,
   ref,
   nboots = 1000,
   parametric = FALSE,

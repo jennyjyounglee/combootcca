@@ -4,14 +4,7 @@
 \alias{cancor_scaled}
 \title{Canonical Correlations with Unit Variance}
 \usage{
-cancor_scaled(
-  x,
-  y,
-  xcenter = TRUE,
-  ycenter = TRUE,
-  align = cca_align_posdiag,
-  ref
-)
+cancor_scaled(x, y, xcenter = TRUE, ycenter = TRUE, align = cca_align_nil, ref)
 }
 \arguments{
 \item{x}{one dataset}

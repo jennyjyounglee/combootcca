@@ -14,7 +14,11 @@ Fortify a covariance matrix by growing all eigenvalues past the K'th
 }
 \details{
 Some of our procedures may produce a covariance matrix that is very nearly
-rank deficient, i.e., eigenvalues past the K'th may be arbitrarily small. This function will attempt to remedy this by replacing all eigenvalues after the K'th with new values that are sorted uniforms drawn with support between 0 and the K'th eigenvalue
+rank deficient, i.e., eigenvalues past the K'th may be arbitrarily small.
+This function will attempt to remedy this by replacing all eigenvalues after
+the K'th with new values that are nonzero. Specifically, it will linearly
+interpolate between the smallest eigenvalue and 0 (without including either
+endpoint).
 }
 \author{
 Dan Kessler

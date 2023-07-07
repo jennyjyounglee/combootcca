@@ -8,11 +8,15 @@ bt_problem_std_fun(
   job = NULL,
   data = NULL,
   data_is_sigma = FALSE,
-  p = NULL,
-  q = NULL,
+  pq = NULL,
   n = NULL,
-  inreps = 1L,
-  ...
+  cov_type = c("id", "sPrec")[1],
+  rho1 = 0.9,
+  rho2 = 0,
+  fiddle.var = NULL,
+  fiddle.comp = NULL,
+  fiddle.val = NULL,
+  inreps = 1L
 )
 }
 \arguments{
@@ -25,15 +29,25 @@ then pass a single square covariance matrix of dimension (p + q)}
 \item{data_is_sigma}{If true, treat "data" as sigma: a square covariance
 matrix of dimension (p + q)}
 
-\item{p}{The dimension of the random variable X}
-
-\item{q}{The dimension of the random variable Y}
+\item{pq}{A string like "p,q" with dimensions of the random variables X, Y}
 
 \item{n}{The number of observations}
 
-\item{inreps}{How many replicates to draw}
+\item{cov_type}{Specifies covariance structure for X and Y. If "id", then
+both have identity covariance matrices. If "sPrec", then both will
+covariance corresponding to sparse precision matrices (see details).}
 
-\item{...}{Additional arguments passed to gen_sigma}
+\item{rho1}{Largest canonical correlation}
+
+\item{rho2}{Second largest canonical correlation}
+
+\item{fiddle.var}{Coefficients of which variable you want to modify}
+
+\item{fiddle.comp}{Component whose last coordinate you want to modify}
+
+\item{fiddle.val}{String, one of "0", "mean", or "max"}
+
+\item{inreps}{}
 }
 \value{
 An instance
@@ -42,7 +56,7 @@ An instance
 This is a convenience function for use with batchtools
 }
 \details{
-The details go here
+TODO: Write details for sPrec
 }
 \author{
 Daniel Kessler

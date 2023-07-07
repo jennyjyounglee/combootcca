@@ -8,7 +8,7 @@ cca_ci_regression(
   x,
   y,
   level = 0.9,
-  align = cca_align_posdiag,
+  align = cca_align_nil,
   ref,
   train_ratio = 0.5
 )

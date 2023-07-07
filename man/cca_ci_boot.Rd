@@ -8,11 +8,12 @@ cca_ci_boot(
   x,
   y,
   level = 0.9,
-  align = cca_align_posdiag,
+  align = cca_align_nil,
   ref,
   nboots = 100,
   ncpus = 1,
-  boot_type = c("norm", "basic", "perc", "bca")
+  boot_type = c("norm", "basic", "perc", "bca"),
+  return_boot = FALSE
 )
 }
 \arguments{
@@ -33,6 +34,9 @@ cca_ci_boot(
 
 \item{boot_type}{Which bootstrap methods to use; see type argument of
 boot::boot.ci}
+
+\item{return_boot}{Whether to return the (potentially very large) boot_out
+object created by the bootstrap function. Defaults to FALSE}
 }
 \value{
 List of several types of CIs

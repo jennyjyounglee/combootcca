@@ -2,8 +2,7 @@
 % Please edit documentation in R/funcs.R
 \name{cos_sim}
 \alias{cos_sim}
-\title{Compute (possibly reweighted) cosine similarity between columns of
-two matrices}
+\title{Compute cosine similarity between columns of two matrices}
 \usage{
 cos_sim(x, y)
 }
@@ -17,8 +16,7 @@ Matrix of size p by q of cosine similarities. The (i, j) entry has
 the similarity between x_i and y_j.
 }
 \description{
-Compute (possibly reweighted) cosine similarity between columns of
-two matrices
+Compute cosine similarity between columns of two matrices
 }
 \author{
 Daniel Kessler
