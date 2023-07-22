@@ -1039,8 +1039,7 @@ gen_sigma <- function(p, q, rho_max = 0.9, rho_gap = 0.1, rho_decay = 1,
   return(sigma)
 }
 
-gen_sigma2 <- function(p, q, cov_type, rho1, rho2) {
-
+gen_sigma2 <- function(p, q, cov_type, rho1, rho2, type = "sparse") {
   if (cov_type == "id") {
     sxx <- diag(p)
     syy <- diag(q)
@@ -1051,10 +1050,42 @@ gen_sigma2 <- function(p, q, cov_type, rho1, rho2) {
     syy <- gen_sPrec(q)
   }
 
-  beta1 <- normalize_wrtIP(rep(c(1, 0), c(2, p - 2)), sxx)
-  beta2 <- normalize_wrtIP(rep(c(0, 1), c(p - 2, 2)), sxx)
-  gamma1 <- normalize_wrtIP(rep(c(1, 0), c(2, q - 2)), syy)
-  gamma2 <- normalize_wrtIP(rep(c(0, 1), c(q - 2, 2)), syy)
+  p_wall1 <- floor(p / 2)
+  p_wall2 <- p_wall1 + 1
+  q_wall1 <- floor(q / 2)
+  q_wall2 <- q_wall1 + 1
+
+
+  ## initialize
+  beta1 <- rep(0, p)
+  beta2 <- rep(0, p)
+  gamma1 <- rep(0, q)
+  gamma2 <- rep(0, q)
+
+
+  if (type == "sparse") {
+    beta1 <- rep(c(1, 0), c(2, p - 2))
+    beta2 <- rep(c(0, 1), c(p - 2, 2))
+    gamma1 <- rep(c(1, 0), c(2, q - 2))
+    gamma2 <- rep(c(0, 1), c(q - 2, 2))
+  } else if (type == "constant") {
+    beta1[1:p_wall1] <- 1
+    beta2[p_wall2:p] <- 1
+    gamma1[1:q_wall1] <- 1
+    gamma2[q_wall2:q] <- 1
+  } else if (type == "random") {
+    beta1[1:p_wall1] <- rnorm(p_wall1)
+    beta2[p_wall2:p] <- rnorm(p - p_wall2 + 1)
+    gamma1[1:q_wall1] <- rnorm(q_wall1)
+    gamma2[q_wall2:q] <- rnorm(q - q_wall2 + 1)
+  }
+
+  beta1 <- normalize_wrtIP(beta1, sxx)
+  beta2 <- normalize_wrtIP(beta2, sxx)
+  gamma1 <- normalize_wrtIP(gamma1, syy)
+  gamma2 <- normalize_wrtIP(gamma2, syy)
+
+
 
   syx_tmp <- rho1 * gamma1 %*% t(beta1) + rho2 * gamma2 %*% t(beta2)
   syx <- syy %*% syx_tmp %*% sxx
@@ -1337,7 +1368,8 @@ bt_problem_std_fun <- function(job = NULL, data = NULL, data_is_sigma = FALSE,
                                fiddle.var = NULL,
                                fiddle.comp = NULL,
                                fiddle.val = NULL,
-                               inreps = 1L) {
+                               inreps = 1L,
+                               type = NULL) {
 
   if (is.character(pq)) {
     pq_num <- as.integer(unlist(strsplit(pq, split = ",", fixed = TRUE)))
@@ -1370,7 +1402,7 @@ bt_problem_std_fun <- function(job = NULL, data = NULL, data_is_sigma = FALSE,
   }
 
   if (is.null(data)) { # do it from scratch
-    sigma <- gen_sigma2(p, q, cov_type, rho1, rho2)
+    sigma <- gen_sigma2(p, q, cov_type, rho1, rho2, type)
     instance$inreps <- replicate(inreps, prob_fun_inner(), simplify = FALSE)
   }
 
