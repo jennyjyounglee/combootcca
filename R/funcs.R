@@ -1751,6 +1751,42 @@ cca_ci_lengths1 <- function(cis_coef) {
   return(res)
 }
 
+## Compute the endpoints of confidence intervals
+cca_ci_ends <- function(cis) {
+  ends <- list()
+  ends$x <- cca_ci_ends1(cis$xcoef)
+  ends$y <- cca_ci_ends1(cis$ycoef)
+
+  res <- data.table::rbindlist(ends, idcol = "variable")
+  return(res)
+}
+
+cca_ci_ends1 <- function(cis_coef) {
+  p <- dim(cis_coef)[1]
+  K <- dim(cis_coef)[2]
+
+  lower <- cis_coef[, , 1]
+  upper <- cis_coef[, , 2]
+
+  res_lower <- data.table::data.table(
+    metric = "CI_lower",
+    component = rep(1:K, each = p),
+    coordinate = 1:p,
+    value = c(lower)
+  )
+
+  res_upper <- data.table::data.table(
+    metric = "CI_upper",
+    component = rep(1:K, each = p),
+    coordinate = 1:p,
+    value = c(upper)
+  )
+
+  res <- data.table::rbindlist(list(res_lower, res_upper))
+
+  return(res)
+}
+
 
 ##' @title Compute CI coverage for a vector
 ##' @param true A vector of length p
@@ -1803,10 +1839,11 @@ cca_metric_standard <- function(fm_true, cis, ...) {
   tmp <- cca_ci_coverage_signflip(fm_true, cis)
   covs <- tmp$covs
   true <- tmp$true
+  ends <- cca_ci_ends(cis)
   lengths <- cca_ci_lengths(cis)
   sigdet <- cca_ci_sigdet(fm_true, cis)
   h0 <- cca_ci_h0(fm_true, cis)
-  res <- rbind(covs, lengths, sigdet, h0, true)
+  res <- rbind(covs, true, ends, lengths, sigdet, h0)
   return(res)
 }
 
