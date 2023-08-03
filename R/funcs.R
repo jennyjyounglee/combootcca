@@ -1681,7 +1681,10 @@ cca_ci_coverage_signflip <- function(fm_true, cis, xyweight = NULL) {
   fm_true_flip$xcoef <- fm_true$xcoef %*% sign_flip_mat
   fm_true_flip$ycoef <- fm_true$ycoef %*% sign_flip_mat
 
-  res <- cca_ci_coverage_raw(fm_true_flip, cis)
+  res <- list()
+
+  res$covs <- cca_ci_coverage_raw(fm_true_flip, cis)
+  res$true <- cca_ci_true(fm_true_flip, cis)
   return(res)
 }
 
@@ -1797,12 +1800,12 @@ hungarian_max_signflip <- function(C) {
 
 cca_metric_standard <- function(fm_true, cis, ...) {
   ## compute lengths and coverages
-
-  covs <- cca_ci_coverage_signflip(fm_true, cis)
+  tmp <- cca_ci_coverage_signflip(fm_true, cis)
+  covs <- tmp$covs
+  true <- tmp$true
   lengths <- cca_ci_lengths(cis)
   sigdet <- cca_ci_sigdet(fm_true, cis)
   h0 <- cca_ci_h0(fm_true, cis)
-  true <- cca_ci_true(fm_true, cis)
   res <- rbind(covs, lengths, sigdet, h0, true)
   return(res)
 }
