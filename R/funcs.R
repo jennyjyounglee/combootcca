@@ -773,7 +773,7 @@ cca_ci_laha <- function(x, y, level = 0.90,
 
   laha <- de.bias.cca::give_CCA(fm$xcoef[, 1], fm$ycoef[, 1], x, y)
 
-  rho_hat <- sqrt(laha[[4]])
+  rho_hat <- c(sqrt(laha[[4]]))
   xvar[, 1] <- laha[[3]][1:p]
   yvar[, 1] <- laha[[3]][(p + 1) : (p + q)]
 
