@@ -793,12 +793,12 @@ cca_ci_laha <- function(x, y, level = 0.90,
   ycoef_ci <- array(NA, c(q, K, 2),
                     dimnames = adimnames)
 
-  xcoef_ci[, , 1] <- fm$xcoef - sqrt(xvar) * zcrit
-  xcoef_ci[, , 2] <- fm$xcoef + sqrt(xvar) * zcrit
+  xcoef_ci[, , 1] <- fm$xcoef - 2 * sqrt(xvar) * zcrit / sqrt(n)
+  xcoef_ci[, , 2] <- fm$xcoef + 2 * sqrt(xvar) * zcrit / sqrt(n)
 
 
-  ycoef_ci[, , 1] <- fm$ycoef - sqrt(yvar) * zcrit
-  ycoef_ci[, , 2] <- fm$ycoef + sqrt(yvar) * zcrit
+  ycoef_ci[, , 1] <- fm$ycoef - 2 * sqrt(yvar) * zcrit / sqrt(n)
+  ycoef_ci[, , 2] <- fm$ycoef + 2 * sqrt(yvar) * zcrit / sqrt(n)
 
 
   res <- list(xcoef = xcoef_ci, ycoef = ycoef_ci)
