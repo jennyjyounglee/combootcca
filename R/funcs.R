@@ -773,6 +773,7 @@ cca_ci_laha <- function(x, y, level = 0.90,
 
   laha <- de.bias.cca::give_CCA(fm$xcoef[, 1], fm$ycoef[, 1], x, y)
 
+  rho_hat <- sqrt(laha[[4]])
   xvar[, 1] <- laha[[3]][1:p]
   yvar[, 1] <- laha[[3]][(p + 1) : (p + q)]
 
@@ -793,12 +794,12 @@ cca_ci_laha <- function(x, y, level = 0.90,
   ycoef_ci <- array(NA, c(q, K, 2),
                     dimnames = adimnames)
 
-  xcoef_ci[, , 1] <- fm$xcoef - 2 * sqrt(xvar) * zcrit / sqrt(n)
-  xcoef_ci[, , 2] <- fm$xcoef + 2 * sqrt(xvar) * zcrit / sqrt(n)
+  xcoef_ci[, , 1] <- fm$xcoef - 2 * sqrt(xvar) * zcrit / (sqrt(n) * sqrt(rho_hat))
+  xcoef_ci[, , 2] <- fm$xcoef + 2 * sqrt(xvar) * zcrit / (sqrt(n) * sqrt(rho_hat))
 
 
-  ycoef_ci[, , 1] <- fm$ycoef - 2 * sqrt(yvar) * zcrit / sqrt(n)
-  ycoef_ci[, , 2] <- fm$ycoef + 2 * sqrt(yvar) * zcrit / sqrt(n)
+  ycoef_ci[, , 1] <- fm$ycoef - 2 * sqrt(yvar) * zcrit / (sqrt(n) * sqrt(rho_hat))
+  ycoef_ci[, , 2] <- fm$ycoef + 2 * sqrt(yvar) * zcrit / (sqrt(n) * sqrt(rho_hat))
 
 
   res <- list(xcoef = xcoef_ci, ycoef = ycoef_ci)
