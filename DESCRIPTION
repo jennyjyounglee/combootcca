@@ -2,11 +2,11 @@ Package: combootcca
 Title: Inference for Canonical Directions in Canonical Correlation Analysis (CCA)
 Version: 0.0.0.9000
 Authors@R: 
-    person(given = "First",
-           family = "Last",
+    person(given = "Daniel",
+           family = "Kessler",
            role = c("aut", "cre"),
-           email = "first.last@example.com",
-           comment = c(ORCID = "YOUR-ORCID-ID"))
+           email = "kesslerd@umich.edu",
+           comment = c(ORCID = "0000-0003-2052-025X"))
 Description: What the package does (one paragraph).
 License: MIT + file LICENSE
 Encoding: UTF-8
