@@ -7,7 +7,13 @@ Authors@R:
            role = c("aut", "cre"),
            email = "kesslerd@umich.edu",
            comment = c(ORCID = "0000-0003-2052-025X"))
-Description: What the package does (one paragraph).
+Description: A package for conducting inference on the canonical directions
+    obtained from canonical correlation analysis (CCA). It contains a variety of
+    user-facing functions with names like cca_ci_boot for constructing
+    confidence intervals for the coordinates of canonical directions. The
+    centerpiece is cca_ci_combootcca, which uses a bootstrap-based approach that
+    uses a weighted Hungarian algorithm to align bootstrap replicates to a
+    reference solution.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
