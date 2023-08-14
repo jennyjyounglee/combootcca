@@ -439,7 +439,7 @@ cca_ci_asymptotic <- function(x, y, level = .90,
   return(res)
 }
 
-##' Bootstrap absolute quantiles to generate CCA confidence intervals
+##' Bootstrap quantiles of absolute differences to generate CCA confidence intervals
 ##'
 ##' @title Bootstrap-based confidence intervals for CCA directions
 ##' @param x Data matrix of size N by p

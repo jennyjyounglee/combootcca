@@ -35,7 +35,7 @@ integer k, report bootstrap progress every k'th run.}
 List with two objects: xcoef and ycoef.
 }
 \description{
-Bootstrap absolute quantiles to generate CCA confidence intervals
+Bootstrap quantiles of absolute differences to generate CCA confidence intervals
 }
 \author{
 Daniel Kessler

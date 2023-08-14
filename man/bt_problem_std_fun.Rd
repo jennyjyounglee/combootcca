@@ -16,7 +16,8 @@ bt_problem_std_fun(
   fiddle.var = NULL,
   fiddle.comp = NULL,
   fiddle.val = NULL,
-  inreps = 1L
+  inreps = 1L,
+  type = NULL
 )
 }
 \arguments{
