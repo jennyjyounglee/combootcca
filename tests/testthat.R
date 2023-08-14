@@ -1,4 +1,4 @@
 library(testthat)
-library(ccasleuth)
+library(combootcca)
 
-test_check("ccasleuth")
+test_check("combootcca")
