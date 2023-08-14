@@ -1,5 +1,5 @@
 Package: combootcca
-Title: What the Package Does (One Line, Title Case)
+Title: Inference for Canonical Directions in Canonical Correlation Analysis (CCA)
 Version: 0.0.0.9000
 Authors@R: 
     person(given = "First",
