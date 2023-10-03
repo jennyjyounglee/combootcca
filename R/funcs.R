@@ -12,9 +12,9 @@
 ##'
 ##' .. content for \details{} ..
 ##' @title Non-functional CCA alignment
-##' @param fm 
-##' @param ref 
-##' @return 
+##' @param fm
+##' @param ref
+##' @return
 ##' @author Dan Kessler
 ##' @export cca_align_nil
 cca_align_nil <- function(fm, ref) {
@@ -937,7 +937,7 @@ coverage_experiment <- function(outreps = 1L, inreps = 1L, p = 2, q = 2,
       cis[(p + 1):(p + q), , j, i, 2, 2] <- ci_estimates$ycoef[, , 2]
 
       ## bootstrap-abs
-      ci_estimates <- cca_ci_bootstrap(dat$x, dat$y, nboots = 10)
+      ci_estimates <- cca_ci_boot(dat$x, dat$y, nboots = 10)
       cis[1:p, , j, i, 3, 1] <- ci_estimates$xcoef[, , 1]
       cis[1:p, , j, i, 3, 2] <- ci_estimates$xcoef[, , 2]
       cis[(p + 1):(p + q), , j, i, 3, 1] <- ci_estimates$ycoef[, , 1]
@@ -1368,7 +1368,7 @@ cancor_vec <- function(data, p, align, ref) {
 ##' @param fiddle.var Coefficients of which variable you want to modify
 ##' @param fiddle.comp Component whose last coordinate you want to modify
 ##' @param fiddle.val String, one of "0", "mean", or "max"
-##' @param inreps 
+##' @param inreps
 ##' @return An instance
 ##' @author Daniel Kessler
 ##' @export
