@@ -12,9 +12,9 @@
 ##'
 ##' .. content for \details{} ..
 ##' @title Non-functional CCA alignment
-##' @param fm 
-##' @param ref 
-##' @return 
+##' @param fm
+##' @param ref
+##' @return
 ##' @author Dan Kessler
 ##' @export cca_align_nil
 cca_align_nil <- function(fm, ref) {
@@ -1368,7 +1368,7 @@ cancor_vec <- function(data, p, align, ref) {
 ##' @param fiddle.var Coefficients of which variable you want to modify
 ##' @param fiddle.comp Component whose last coordinate you want to modify
 ##' @param fiddle.val String, one of "0", "mean", or "max"
-##' @param inreps 
+##' @param inreps
 ##' @return An instance
 ##' @author Daniel Kessler
 ##' @export
