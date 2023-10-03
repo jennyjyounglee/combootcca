@@ -47,8 +47,6 @@ covariance corresponding to sparse precision matrices (see details).}
 \item{fiddle.comp}{Component whose last coordinate you want to modify}
 
 \item{fiddle.val}{String, one of "0", "mean", or "max"}
-
-\item{inreps}{}
 }
 \value{
 An instance

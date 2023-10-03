@@ -6,11 +6,6 @@
 \usage{
 cca_align_nil(fm, ref)
 }
-\arguments{
-\item{fm}{}
-
-\item{ref}{}
-}
 \description{
 Align CCA solutions by doing nothing.
 }
