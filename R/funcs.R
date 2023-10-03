@@ -16,6 +16,7 @@
 ##' @param ref 
 ##' @return 
 ##' @author Dan Kessler
+##' @export cca_align_nil
 cca_align_nil <- function(fm, ref) {
 
   fm <- cca_trim(fm)
@@ -327,6 +328,7 @@ cca_cos_sim <- function(fm, ref) {
 ##' @param align A function for aligning the solution
 ##' @param ref Passed through to align
 ##' @return
+##' @export cancor_scaled
 ##' @author Daniel Kessler
 cancor_scaled <- function(x, y, xcenter = TRUE, ycenter = TRUE,
                           align = cca_align_nil, ref) {
@@ -636,7 +638,7 @@ cca_ci_regression <- function(x, y, level = .90, align = cca_align_nil, ref,
 ##'   object created by the bootstrap function. Defaults to FALSE
 ##' @return List of several types of CIs
 ##' @author Dan Kessler
-##' @export
+##' @export cca_ci_boot
 cca_ci_boot <- function(x, y, level=0.90, align = cca_align_nil,
                         ref, nboots = 1e2, ncpus = 1,
                         boot_type = c("norm", "basic", "perc", "bca"),
@@ -966,7 +968,7 @@ coverage_experiment <- function(outreps = 1L, inreps = 1L, p = 2, q = 2,
 ##' @return A list with two fields: x and y. They are matrices of size n by p
 ##'   and n by q, respectively.
 ##' @author Dan Kessler
-##' @export
+##' @export gen_data
 gen_data <- function(Sigma, p, q, n) {
   Sigma_r <- chol(Sigma)
 
@@ -1019,7 +1021,6 @@ gen_data <- function(Sigma, p, q, n) {
 ##'   iid N(0, 1) like the rest of Gamma.
 ##' @return A square, positive definite matrix with p+q rows/cols
 ##' @author Dan Kessler
-##' @export
 gen_sigma <- function(p, q, rho_max = 0.9, rho_gap = 0.1, rho_decay = 1,
                       gamma21 = NULL) {
 
@@ -1040,6 +1041,16 @@ gen_sigma <- function(p, q, rho_max = 0.9, rho_gap = 0.1, rho_decay = 1,
   return(sigma)
 }
 
+##' @title Generate covariance matrix for CCA
+##' @param p Dimension of X random variable
+##' @param q Dimension of Y random variable
+##' @param cov_type Either "id" or "sPrec"
+##' @param rho_1 The largest canonical correlation
+##' @param rho_1 The second-largest canonical correlation
+##' @param type Either "sparse", "constant", or "random"
+##' @return A square, positive definite matrix with p+q rows/cols
+##' @author Dan Kessler
+##' @export gen_sigma2
 gen_sigma2 <- function(p, q, cov_type, rho1, rho2, type = "sparse") {
   if (cov_type == "id") {
     sxx <- diag(p)
@@ -1183,7 +1194,7 @@ randortho_fixed <- function(n, type = c("orthonormal", "unitary")) {
 ##'
 ##' ycoef: estimated coefficients for the y variables
 ##' @author Daniel Kessler
-##' @export
+##' @export cancor_cov
 cancor_cov <- function(Sigma, px, align = cca_align_nil, ref) {
   p <- nrow(Sigma)
   sxx <- Sigma[1:px, 1:px]
