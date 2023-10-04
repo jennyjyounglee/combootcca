@@ -34,6 +34,7 @@ cca_align_nil <- function(fm, ref) {
 ##' @param ref Not used
 ##' @return Object like fm but with possible sign flips
 ##' @author Dan Kessler
+##' @export cca_align_posdiag
 cca_align_posdiag <- function(fm, ref) {
 
   fm <- cca_trim(fm)
@@ -67,6 +68,7 @@ cca_align_posdiag <- function(fm, ref) {
 ##' @return Same object as returned by cancor after sign-flipping per
 ##'     the identifiability condition discussed in Details.
 ##' @author Daniel Kessler
+##' @export cca_align_posmax
 cca_align_posmax <- function(fm, ref) {
 
   fm <- cca_trim(fm)
@@ -86,6 +88,7 @@ cca_align_posmax <- function(fm, ref) {
   return(fm)
 }
 
+##' @export cca_align_signflip
 cca_align_signflip <- function(fm, ref) {
 
   fm <- cca_trim(fm)
@@ -103,6 +106,7 @@ cca_align_signflip <- function(fm, ref) {
   return(fm)
 }
 
+##' @export cca_align_greedy
 cca_align_greedy <- function(fm, ref) {
 
   fm <- cca_trim(fm)
@@ -135,6 +139,7 @@ cca_align_greedy <- function(fm, ref) {
   return(fm)
 }
 
+##' @export cca_align_hungarian
 cca_align_hungarian <- function(fm, ref) {
 
   fm <- cca_trim(fm)
@@ -156,6 +161,7 @@ cca_align_hungarian <- function(fm, ref) {
   return(fm)
 }
 
+##' @export cca_align_hungarian_weighted
 ## weight by square roots of reference and fitted canonical correlations
 cca_align_hungarian_weighted <- function(fm, ref) {
   fm <- cca_trim(fm)
@@ -179,6 +185,7 @@ cca_align_hungarian_weighted <- function(fm, ref) {
   return(fm)
 }
 
+##' @export cca_align_procrustes_left
 cca_align_procrustes_left <- function(fm, ref) {
 
   fm <- cca_trim(fm)
@@ -195,6 +202,7 @@ cca_align_procrustes_left <- function(fm, ref) {
   return(fm)
 }
 
+##' @export cca_align_procrustes_right
 cca_align_procrustes_right <- function(fm, ref) {
 
   fm <- cca_trim(fm)
@@ -211,6 +219,7 @@ cca_align_procrustes_right <- function(fm, ref) {
   return(fm)
 }
 
+##' @export cca_align_linear_left
 cca_align_linear_left <- function(fm, ref) {
 
   fm <- cca_trim(fm)
@@ -227,6 +236,7 @@ cca_align_linear_left <- function(fm, ref) {
   return(fm)
 }
 
+##' @export cca_align_linear_right
 cca_align_linear_right <- function(fm, ref) {
 
   fm <- cca_trim(fm)
@@ -243,6 +253,7 @@ cca_align_linear_right <- function(fm, ref) {
   return(fm)
 }
 
+##' @export parse_align
 parse_align <- function(align) {
   if (is.function(align)) {
     return(align)
@@ -720,37 +731,37 @@ cca_ci_boot <- function(x, y, level=0.90, align = cca_align_nil,
     return(ci_glue(ci_flat))
   }
 
-  cca_ci_absboot_boot <- function() {
-    ## make absboot style CI's using boot_out
-    abs_devs <- abs(sweep(boot_out$t, c(2), boot_out$t0))
-    abs_t <- apply(abs_devs, 2, quantile, probs = level)
-
-    ci_lower <- vec2fm(boot_out$t0 - abs_t, p, q)
-    ci_upper <- vec2fm(boot_out$t0 + abs_t, p, q)
-
-    alpha <- 1 - level
-    ci_levels <- paste0(c(100 * alpha / 2, 100 * (1 - alpha / 2)), "%")
-    adimnames <- list(
-      coordinate = NULL,
-      component = 1:K,
-      ci_levels
-    )
-
-    xcoef_ci <- abind::abind(ci_lower$xcoef, ci_upper$xcoef, along = 3)
-    dimnames(xcoef_ci) <- adimnames
-
-    ycoef_ci <- abind::abind(ci_lower$ycoef, ci_upper$ycoef, along = 3)
-    dimnames(ycoef_ci) <- adimnames
-
-    fm <- list(xcoef = xcoef_ci, ycoef = ycoef_ci)
-    return(fm)
-  }
+  # cca_ci_absboot_boot <- function() {
+  #   ## make absboot style CI's using boot_out
+  #   abs_devs <- abs(sweep(boot_out$t, c(2), boot_out$t0))
+  #   abs_t <- apply(abs_devs, 2, quantile, probs = level)
+  #
+  #   ci_lower <- vec2fm(boot_out$t0 - abs_t, p, q)
+  #   ci_upper <- vec2fm(boot_out$t0 + abs_t, p, q)
+  #
+  #   alpha <- 1 - level
+  #   ci_levels <- paste0(c(100 * alpha / 2, 100 * (1 - alpha / 2)), "%")
+  #   adimnames <- list(
+  #     coordinate = NULL,
+  #     component = 1:K,
+  #     ci_levels
+  #   )
+  #
+  #   xcoef_ci <- abind::abind(ci_lower$xcoef, ci_upper$xcoef, along = 3)
+  #   dimnames(xcoef_ci) <- adimnames
+  #
+  #   ycoef_ci <- abind::abind(ci_lower$ycoef, ci_upper$ycoef, along = 3)
+  #   dimnames(ycoef_ci) <- adimnames
+  #
+  #   fm <- list(xcoef = xcoef_ci, ycoef = ycoef_ci)
+  #   return(fm)
+  # }
 
   res <- lapply(boot_type, ci_by_method) # loop over requested boot methods
 
-  res$ci_absboot <- cca_ci_absboot_boot() # get absboot results
-
-  names(res) <- c(boot_type, "AbsBoot")                # preserve method names
+  # res$ci_absboot <- cca_ci_absboot_boot() # get absboot results
+  names(res) <- c(boot_type)
+  # names(res) <- c(boot_type, "AbsBoot")                # preserve method names
   if(return_boot) res$boot_out <- boot_out
   return(res)
 }
@@ -1021,6 +1032,7 @@ gen_data <- function(Sigma, p, q, n) {
 ##'   iid N(0, 1) like the rest of Gamma.
 ##' @return A square, positive definite matrix with p+q rows/cols
 ##' @author Dan Kessler
+##' @export gen_sigma
 gen_sigma <- function(p, q, rho_max = 0.9, rho_gap = 0.1, rho_decay = 1,
                       gamma21 = NULL) {
 
@@ -1111,6 +1123,7 @@ gen_sigma2 <- function(p, q, cov_type, rho1, rho2, type = "sparse") {
   return(sigma)
 }
 
+##' @export gen_sPrec
 gen_sPrec <- function(p) {
   omega <- matrix(0, p, p)
 
@@ -1135,6 +1148,7 @@ gen_sPrec <- function(p) {
 
 ## Normalize with respect to inner product, x is vector to normalize, s is
 ## matrix that induces inner product
+##' @export normalize_wrtIP
 normalize_wrtIP <- function(x, s) {
   magnitude <- drop(t(x) %*% s %*% x)
   x0 <- x / sqrt(magnitude)
