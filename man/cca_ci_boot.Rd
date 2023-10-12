@@ -13,7 +13,8 @@ cca_ci_boot(
   nboots = 100,
   ncpus = 1,
   boot_type = c("norm", "basic", "perc", "bca"),
-  return_boot = FALSE
+  return_boot = FALSE,
+  K = NULL
 )
 }
 \arguments{
@@ -37,6 +38,8 @@ boot::boot.ci}
 
 \item{return_boot}{Whether to return the (potentially very large) boot_out
 object created by the bootstrap function. Defaults to FALSE}
+
+\item{K}{Number of canonical correlations}
 }
 \value{
 List of several types of CIs

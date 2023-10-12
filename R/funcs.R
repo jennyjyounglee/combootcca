@@ -647,18 +647,22 @@ cca_ci_regression <- function(x, y, level = .90, align = cca_align_nil, ref,
 ##'   boot::boot.ci
 ##' @param return_boot Whether to return the (potentially very large) boot_out
 ##'   object created by the bootstrap function. Defaults to FALSE
+##' @param K Number of canonical correlations
 ##' @return List of several types of CIs
 ##' @author Dan Kessler
 ##' @export cca_ci_boot
-cca_ci_boot <- function(x, y, level=0.90, align = cca_align_nil,
+cca_ci_boot <- function(x, y, level = 0.90, align = cca_align_nil,
                         ref, nboots = 1e2, ncpus = 1,
                         boot_type = c("norm", "basic", "perc", "bca"),
-                        return_boot = FALSE) {
+                        return_boot = FALSE,
+                        K = NULL) {
   align <- parse_align(align)
   n <- nrow(x)
   p <- ncol(x)
   q <- ncol(y)
-  K <- min(p, q, n)
+  if(is.null(K)){
+    K <- min(p, q, n)
+  }
 
   data_flat <- cbind(x, y)
 
@@ -699,10 +703,10 @@ cca_ci_boot <- function(x, y, level=0.90, align = cca_align_nil,
     ci_lower <- vec2fm(ci_flat[, 1], p, q)
     ci_upper <- vec2fm(ci_flat[, 2], p, q)
 
-    xcoef_ci <- abind::abind(ci_lower$xcoef, ci_upper$xcoef, along = 3)
+    xcoef_ci <- abind::abind(as.matrix(ci_lower$xcoef,ncol=K), as.matrix(ci_upper$xcoef,ncol=K), along = 3)
     dimnames(xcoef_ci) <- adimnames
 
-    ycoef_ci <- abind::abind(ci_lower$ycoef, ci_upper$ycoef, along = 3)
+    ycoef_ci <- abind::abind(as.matrix(ci_lower$ycoef,ncol=K), as.matrix(ci_upper$ycoef,ncol=K), along = 3)
     dimnames(ycoef_ci) <- adimnames
 
     fm <- list(xcoef = xcoef_ci, ycoef = ycoef_ci)
@@ -1224,7 +1228,7 @@ cancor_cov <- function(Sigma, px, align = cca_align_nil, ref) {
   xcoef <- sxx.sqrti %*% SVD$v
   ycoef <- syy.sqrti %*% SVD$u
 
-  svd(Sigma)
+  # svd(Sigma)
   fm <- list(cor = rho, xcoef = xcoef, ycoef = ycoef)
   align <- parse_align(align)
   fm <- align(fm, ref)
